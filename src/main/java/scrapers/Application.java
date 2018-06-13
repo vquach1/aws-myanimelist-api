@@ -1,24 +1,11 @@
 package scrapers;
 
-import awsUtils.S3Utils;
-import config.ConverterConfig;
 import hibernateUtils.HibernateUtils;
 import hibernateUtils.hibernateConverters.*;
-import hibernateUtils.hibernateObjects.*;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Application{
     public static int getId(String key) {
@@ -28,7 +15,7 @@ public class Application{
     }
 
     public static void main(String[] args) throws Exception {
-        ApplicationContext context = new ClassPathXmlApplicationContext("context.xml");
+        ApplicationContext context = new ClassPathXmlApplicationContext("src/main/context.xml");
         Converter animeConverter = context.getBean(AnimeConverter.class);
         Converter animeStatisticConverter = context.getBean(AnimeStatisticConverter.class);
         HibernateUtils hibernateUtils = context.getBean(HibernateUtils.class);
