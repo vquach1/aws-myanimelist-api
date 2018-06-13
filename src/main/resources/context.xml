@@ -19,6 +19,7 @@
         <property name="url" value="#{ systemEnvironment.MYANIMELIST_RDS_URL }" />
         <property name="username" value="#{ systemEnvironment.MYANIMELIST_RDS_USER }" />
         <property name="password" value="#{ systemEnvironment.MYANIMELIST_RDS_PASS }" />
+        <property name="foo" value="bar"/>
     </bean>
 
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
