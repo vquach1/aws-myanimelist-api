@@ -18,20 +18,12 @@ public class S3Utils {
     public static final String MAL_SCRAPE_PRODUCERS = "mal-scrape-producers";
 
     private AmazonS3 s3;
-    private int requestCount = 0; // TODO: Request count is really janky. This needs to be refactored
 
     public S3Utils() {
         s3 = AmazonS3ClientBuilder.defaultClient();
     }
 
     public String readObject(String bucket, String key) {
-        if (requestCount == 50) {
-            s3 = AmazonS3ClientBuilder.defaultClient();
-            requestCount = 0;
-        }
-
-        requestCount++;
-
         String objectStr = null;
 
         try {
@@ -54,15 +46,11 @@ public class S3Utils {
         return objectStr;
     }
 
-    public List<String> getKeys(String bucket) {
-        if (requestCount == 50) {
-            s3 = AmazonS3ClientBuilder.defaultClient();
-            requestCount = 0;
-        }
-
-        requestCount++;
-
-        ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucket).withMaxKeys(1000);
+    public List<String> getKeys(String bucket, String prefix) {
+        ListObjectsV2Request req = new ListObjectsV2Request()
+                .withBucketName(bucket)
+                .withPrefix(prefix)
+                .withMaxKeys(1000);
         ListObjectsV2Result result;
         List<String> keys = new ArrayList<String>();
 
@@ -79,5 +67,11 @@ public class S3Utils {
         } while (result != null && result.isTruncated());
 
         return keys;
+    }
+
+    public void moveObject(String oldBucket, String oldKey, String newBucket, String newKey) {
+        CopyObjectRequest req = new CopyObjectRequest(oldBucket, oldKey, newBucket, newKey);
+        s3.copyObject(req);
+        s3.deleteObject(new DeleteObjectRequest(oldBucket, oldKey));
     }
 }
