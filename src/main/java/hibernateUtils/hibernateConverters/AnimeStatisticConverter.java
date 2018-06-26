@@ -1,21 +1,23 @@
 package hibernateUtils.hibernateConverters;
 
 import hibernateUtils.hibernateObjects.AnimeStatistic;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import scrapers.AnimeStatisticPage;
 
-public class AnimeStatisticConverter extends AnimeMangaStatisticConverter {
-    public AnimeStatisticConverter(String bucketName) {
-        super(bucketName);
-    }
+import java.util.HashMap;
 
-    public void convert(String key) {
-        String[] keySplit = key.split("-");
-        int id = Integer.parseInt(keySplit[keySplit.length - 1]);
+public class AnimeStatisticConverter extends AnimeAndMangaStatisticConverter {
+    @Autowired
+    @Qualifier("animeIdToPathMap")
+    private HashMap<Integer, String> animeIdToPathMap;
 
-        String rawHtml = s3Utils.readObject(bucketName, key);
-        Document doc = Jsoup.parse(rawHtml, "UTF-8");
+    public AnimeStatisticConverter() {}
+
+    public void convert(int animeId) {
+        String path = animeIdToPathMap.get(animeId) + "/stats";
+        Document doc = parseHtml(path);
         AnimeStatisticPage page = new AnimeStatisticPage(doc);
         AnimeStatistic animeStat = new AnimeStatistic();
 
@@ -23,10 +25,10 @@ public class AnimeStatisticConverter extends AnimeMangaStatisticConverter {
         convertCommonStats(animeStat, page);
 
         // Set id and statistics unique to an anime page
-        animeStat.setId(id);
+        animeStat.setId(animeId);
         animeStat.setWatching(page.parseWatching());
         animeStat.setPlanToWatch(page.parsePlanToWatch());
 
-        hibernateUtils.updateMalMapping(id, animeStat);
+        hibernateUtils.updateMalMapping(animeId, animeStat);
     }
 }

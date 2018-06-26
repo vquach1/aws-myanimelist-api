@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "magazines")
+@Table(name = "myanimelist.magazines")
 public class Magazine extends MalMapping {
     @Id
     @Column(name = "id")
@@ -14,6 +14,8 @@ public class Magazine extends MalMapping {
 
     @Column(name = "name")
     private String name;
+
+    public Magazine() {}
 
     public Magazine(int id, String name) {
         this.id = id;

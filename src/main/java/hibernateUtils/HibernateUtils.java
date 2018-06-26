@@ -6,6 +6,7 @@ import org.hibernate.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,12 @@ import java.util.stream.Collectors;
 public class HibernateUtils {
     @Autowired
     private SessionFactory factory;
+
+    public void updateMalMappings(HashMap<Integer, MalMapping> idToMalMappingMap) {
+        for (Integer id : idToMalMappingMap.keySet()) {
+            updateMalMapping(id, idToMalMappingMap.get(id));
+        }
+    }
 
     public void updateMalMapping(int id, MalMapping mapping) {
         Session session = factory.getCurrentSession();

@@ -1,4 +1,4 @@
-package scrapeTasks;
+package utils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -39,6 +39,10 @@ public class Graph<T> {
         return nodes.get(key).value;
     }
 
+    /*
+     * Returns a list of neighbors for the node specified by the
+     * key. If the node does not exist, an empty list is returned
+     */
     public List<T> getNeighbors(String key) {
         if (!nodes.containsKey(key)) {
             return new LinkedList<>();
@@ -83,6 +87,23 @@ public class Graph<T> {
 
         adjs.remove(key);
         return nodes.remove(key).value;
+    }
+
+    /*
+     * Adds an edge between the nodes specified by the source
+     * and destination keys, and returns true if the operation is
+     * successful. The operation only fails if either node does
+     * not exist
+     */
+    public boolean addEdge(String sourceKey, String destKey) {
+        if (!nodes.containsKey(sourceKey) || !nodes.containsKey(destKey)) {
+            return false;
+        }
+
+        Node destNode = nodes.get(destKey);
+        adjs.get(sourceKey).add(destNode);
+        destNode.numDependencies++;
+        return true;
     }
 
     /*

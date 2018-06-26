@@ -5,11 +5,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
+import scrapers.abstractScrapers.MalPage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class AnimeDetailsPage extends MalPage {
     private static final String typeSelector = "span[class='dark_text']:contains(Type:)";
@@ -27,6 +29,7 @@ public class AnimeDetailsPage extends MalPage {
     private static final String ratingSelector = "span[class='dark_text']:contains(Rating:)";
     private static final String synopsisSelector = "span[itemprop='description']";
     private static final String backgroundSelector = "h2[style='margin-top: 15px;']:contains(Background)";
+    private static final String spinoffSelector = "td[class='ar fw-n borderClass']:contains(Spin-off:)";
 
     public AnimeDetailsPage(Document doc) {
         super(doc);
@@ -141,4 +144,8 @@ public class AnimeDetailsPage extends MalPage {
         return backgroundText.toString();
     }
 
+    public List<String> parseSpinoffs() {
+        Element spinoffs = nextElementSibling(spinoffSelector);
+        return spinoffs.children().stream().map(elem -> elem.attr("href")).collect(Collectors.toList());
+    }
 }

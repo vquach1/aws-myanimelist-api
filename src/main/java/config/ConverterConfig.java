@@ -1,34 +1,90 @@
 package config;
 
-import awsUtils.S3Utils;
 import hibernateUtils.hibernateConverters.*;
+import utils.S3Utils;
+import org.apache.commons.lang.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+
 @Configuration
 public class ConverterConfig {
-    @Bean
-    public CharacterConverter characterConverter() {
-        return new CharacterConverter(S3Utils.MAL_SCRAPE_CHARACTERS);
-    }
-
-    @Bean
-    public PersonConverter personConverter() {
-        return new PersonConverter(S3Utils.MAL_SCRAPE_PERSONS);
-    }
+    @Autowired
+    private S3Utils s3Utils;
 
     @Bean
     public AnimeConverter animeConverter() {
-        return new AnimeConverter(S3Utils.MAL_SCRAPE_ANIME);
-    }
-
-    @Bean
-    public ProducerConverter producerConverter() {
-        return new ProducerConverter(S3Utils.MAL_SCRAPE_PRODUCERS);
+        return new AnimeConverter();
     }
 
     @Bean
     public AnimeStatisticConverter animeStatisticConverter() {
-        return new AnimeStatisticConverter(S3Utils.MAL_SCRAPE_ANIME_STATISTICS);
+        return new AnimeStatisticConverter();
+    }
+
+    @Bean
+    public CharacterConverter characterConverter() {
+        return new CharacterConverter();
+    }
+
+    @Bean
+    public MangaStatisticConverter mangaStatisticConverter() {
+        return new MangaStatisticConverter();
+    }
+
+    @Bean
+    public PersonConverter personCoverter() {
+        return new PersonConverter();
+    }
+
+    @Bean
+    public ProducerAndMagazineConverter producerConverter() {
+        return new ProducerAndMagazineConverter();
+    }
+
+    @Bean
+    public HashMap<Integer, String> animeIdToPathMap() {
+        HashMap<Integer, String> map = new HashMap<>();
+        insertIdPathPairs(map, "sitemap/anime-000.xml");
+        return map;
+    }
+
+    @Bean
+    public HashMap<Integer, String> mangaIdToPathMap() {
+        HashMap<Integer, String> map = new HashMap<>();
+        insertIdPathPairs(map, "sitemap/manga-000.xml");
+        return map;
+    }
+
+    @Bean
+    public HashMap<Integer, String> characterIdToPathMap() {
+        HashMap<Integer, String> map = new HashMap<>();
+        insertIdPathPairs(map, "sitemap/character-000.xml");
+        insertIdPathPairs(map, "sitemap/character-001.xml");
+        return map;
+    }
+
+    @Bean
+    public HashMap<Integer, String> peopleIdToPathMap() {
+        HashMap<Integer, String> map = new HashMap<>();
+        insertIdPathPairs(map, "sitemap/people-000.xml");
+        return map;
+    }
+
+    private void insertIdPathPairs(HashMap<Integer, String> map, String s3IndexPath) {
+        String index = s3Utils.readObject(s3IndexPath);
+        Document doc = Jsoup.parse(index, "", Parser.xmlParser());
+
+        for (Element elem : doc.select("loc")) {
+            String path = StringUtils.removeStart(elem.ownText(), "https://myanimelist.net/");
+            int id = Integer.valueOf(path.split("/")[1]);
+            map.put(id, path);
+        }
     }
 }

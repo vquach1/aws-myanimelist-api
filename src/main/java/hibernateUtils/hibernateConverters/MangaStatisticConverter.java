@@ -1,21 +1,23 @@
 package hibernateUtils.hibernateConverters;
 
 import hibernateUtils.hibernateObjects.MangaStatistic;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import scrapers.MangaStatisticPage;
 
-public class MangaStatisticConverter extends AnimeMangaStatisticConverter {
-    public MangaStatisticConverter(String bucketName) {
-        super(bucketName);
-    }
+import java.util.HashMap;
 
-    public void convert(String key) {
-        String[] keySplit = key.split("-");
-        int id = Integer.parseInt(keySplit[keySplit.length - 1]);
+public class MangaStatisticConverter extends AnimeAndMangaStatisticConverter {
+    @Autowired
+    @Qualifier("mangaIdToPathMap")
+    private HashMap<Integer, String> mangaIdToPathMap;
 
-        String rawHtml = s3Utils.readObject(bucketName, key);
-        Document doc = Jsoup.parse(rawHtml, "UTF-8");
+    public MangaStatisticConverter() {}
+
+    public void convert(int mangaId) {
+        String path = mangaIdToPathMap.get(mangaId) + "/stats";
+        Document doc = parseHtml(path);
         MangaStatisticPage page = new MangaStatisticPage(doc);
         MangaStatistic mangaStat = new MangaStatistic();
 
@@ -23,10 +25,10 @@ public class MangaStatisticConverter extends AnimeMangaStatisticConverter {
         convertCommonStats(mangaStat, page);
 
         // Set id and statistics unique to a manga page
-        mangaStat.setId(id);
+        mangaStat.setId(mangaId);
         mangaStat.setReading(page.parseReading());
         mangaStat.setPlanToRead(page.parsePlanToRead());
 
-        hibernateUtils.updateMalMapping(id, mangaStat);
+        hibernateUtils.updateMalMapping(mangaId, mangaStat);
     }
 }

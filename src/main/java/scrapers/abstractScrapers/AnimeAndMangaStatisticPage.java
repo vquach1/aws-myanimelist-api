@@ -1,4 +1,4 @@
-package scrapers;
+package scrapers.abstractScrapers;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
@@ -7,7 +7,7 @@ import org.jsoup.nodes.Element;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class AnimeMangaStatisticPage extends MalPage{
+public abstract class AnimeAndMangaStatisticPage extends MalPage {
     protected static final String scoreSelector = "span[itemprop='ratingValue']";
     protected static final String rankedSelector = "span[class='dark_text']:contains(Ranked:)";
     protected static final String popularitySelector = "span[class='dark_text']:contains(Popularity:)";
@@ -21,7 +21,7 @@ public abstract class AnimeMangaStatisticPage extends MalPage{
     protected static String ratingRegex = "((\\d|\\.)+)% <small>\\((\\d+) votes\\)</small>";
     protected static Pattern ratingPattern = Pattern.compile(ratingRegex);
 
-    public AnimeMangaStatisticPage(Document doc) {
+    public AnimeAndMangaStatisticPage(Document doc) {
         super(doc);
     }
 

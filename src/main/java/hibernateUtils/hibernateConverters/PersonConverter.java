@@ -3,27 +3,32 @@ package hibernateUtils.hibernateConverters;
 import hibernateUtils.hibernateObjects.Person;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import scrapers.PersonDetailsPage;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class PersonConverter extends Converter {
-    public PersonConverter(String bucketName) {
-        super(bucketName);
-    }
+    @Autowired
+    @Qualifier("peopleIdToPathMap")
+    private HashMap<Integer, String> peopleIdToPathMap;
 
-    public void convert(String key) {
-        String[] keySplit = key.split("-");
-        int id = Integer.parseInt(keySplit[keySplit.length - 1]);
+    public PersonConverter() {}
 
-        String rawHtml = s3Utils.readObject(bucketName, key);
-        Document doc = Jsoup.parse(rawHtml, "UTF-8");
+    public void convert(int personId) {
+        String path = peopleIdToPathMap.get(personId);
+        Document doc = parseHtml(path);;
         PersonDetailsPage page = new PersonDetailsPage(doc);
+        Person person = new Person();
 
+        person.setId(personId);
+
+        // Parse English and foreign names. To simplify things,
+        // everything that's not the first name (e.g. middle names)
+        // will be lumped into the last name
         String[] fullName = page.parseName().split(" ");
-        String englishFirstName = fullName[0];;
-
-        // Parse English last name. May be multiple
         String englishLastName;
 
         if (fullName.length == 1) {
@@ -33,21 +38,25 @@ public class PersonConverter extends Converter {
             englishLastName = String.join(" ", englishLastNameArr);
         }
 
-        String foreignFirstName = page.parseGivenName();
-        String foreignLastName = page.parseFamilyName();
+        person.setEnglishFirstName(fullName[0]);
+        person.setEnglishLastName(englishLastName);
 
+        person.setForeignFirstName(page.parseGivenName());
+        person.setForeignLastName(page.parseFamilyName());
+
+        // Parse birthday
         String birthday = page.parseBirthday();
         if (birthday.equals("Unknown")) {
             birthday = "";
         }
 
-        String website = page.parseWebsite();
-        int favorites = page.parseMemberFavorites();
-        String otherInfo = page.parseMore();
+        person.setBirthday(birthday);
 
-        Person person = new Person(id, englishFirstName, englishLastName, foreignFirstName,
-                foreignLastName, birthday, website, favorites, otherInfo);
+        // Parse website, member favorites, and information in section 'More'
+        person.setWebsite(page.parseWebsite());
+        person.setFavorites(page.parseMemberFavorites());
+        person.setOtherInfo(page.parseMore());
 
-        hibernateUtils.updateMalMapping(id, person);
+        hibernateUtils.updateMalMapping(personId, person);
     }
 }

@@ -15,6 +15,8 @@ public class Producer extends MalMapping {
     @Column(name = "name")
     private String name;
 
+    public Producer() {}
+
     public Producer(int id, String name) {
         this.id = id;
         this.name = name;

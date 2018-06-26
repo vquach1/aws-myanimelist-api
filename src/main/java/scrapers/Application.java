@@ -1,6 +1,6 @@
 package scrapers;
 
-import hibernateUtils.HibernateUtils;
+import utils.S3Utils;
 import hibernateUtils.hibernateConverters.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -15,13 +15,30 @@ public class Application{
     }
 
     public static void main(String[] args) throws Exception {
-        ApplicationContext context = new ClassPathXmlApplicationContext("src/main/context.xml");
-        Converter animeConverter = context.getBean(AnimeConverter.class);
-        Converter animeStatisticConverter = context.getBean(AnimeStatisticConverter.class);
-        HibernateUtils hibernateUtils = context.getBean(HibernateUtils.class);
+        ApplicationContext context = new ClassPathXmlApplicationContext("context.xml");
+        S3Utils s3Utils = context.getBean(S3Utils.class);
 
-        animeConverter.convert("d/anime-31240");
-        animeStatisticConverter.convert("d/anime-stats-31240");
+        /*
+        ProducerAndMagazineConverter producerAndMagazineConverter =
+                context.getBean(ProducerAndMagazineConverter.class);
+        producerAndMagazineConverter.convert();
+        */
+
+        /*
+        List<String> keys = new ArrayList<>();
+        //keys.addAll(s3Utils.getKeys("mal-scrape", "manga/stats/"));
+        for (String oldKey : keys) {
+            String rawHtml = s3Utils.readObject("mal-scrape", oldKey);
+            Document doc = Jsoup.parse(rawHtml);
+            Element elem = doc.selectFirst("meta[property='og:url']");
+
+            if (elem != null) {
+                String newKey = StringUtils.removeStart(elem.attr("content"), "https://myanimelist.net/");
+                System.out.println(newKey);
+                s3Utils.moveObject(s3Utils.BUCKET, oldKey, s3Utils.BUCKET, newKey);
+            }
+        }
+        */
 
         /*
         SpringApplication app = new SpringApplication(Application.class);

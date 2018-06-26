@@ -1,4 +1,4 @@
-package scrapers;
+package scrapers.abstractScrapers;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -13,13 +13,15 @@ import java.util.regex.Pattern;
 abstract public class MalPage{
     protected Document doc;
 
-    protected static String producerIdRegex = "/anime/producer/(\\d+)";
-    protected static String animeIdRegex = "/anime/(\\d+)";
-    protected static String mangaIdRegex = "/manga/(\\d+)";
-    protected static String personIdRegex = "/people/(\\d+)";
-    protected static String genreIdRegex = "/genre/(\\d+)";
+    private static String producerIdRegex = "/anime/producer/(\\d+)";
+    private static String magazineIdRegex = "/manga/magazine/(\\d+)";
+    private static String animeIdRegex = "/anime/(\\d+)";
+    private static String mangaIdRegex = "/manga/(\\d+)";
+    private static String personIdRegex = "/people/(\\d+)";
+    private static String genreIdRegex = "/genre/(\\d+)";
 
     protected static Pattern producerIdPattern = Pattern.compile(producerIdRegex);
+    protected static Pattern magazineIdPattern = Pattern.compile(magazineIdRegex);
     protected static Pattern animeIdPattern = Pattern.compile(animeIdRegex);
     protected static Pattern mangaIdPattern = Pattern.compile(mangaIdRegex);
     protected static Pattern personIdPattern = Pattern.compile(personIdRegex);

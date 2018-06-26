@@ -2,8 +2,9 @@ package scrapers;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import scrapers.abstractScrapers.AnimeAndMangaStatisticPage;
 
-public class MangaStatisticPage extends AnimeMangaStatisticPage {
+public class MangaStatisticPage extends AnimeAndMangaStatisticPage {
     private static final String readingSelector = "span[class='dark_text']:contains(Reading:)";
     private static final String planToReadSelector = "span[class='dark_text']:contains(Plan To Read:)";
 

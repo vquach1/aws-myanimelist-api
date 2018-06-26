@@ -4,6 +4,7 @@ import hibernateUtils.hibernateObjects.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import scrapers.AnimeDetailsPage;
 
 import javax.annotation.PostConstruct;
@@ -19,12 +20,20 @@ public class AnimeConverter extends Converter {
     private HashMap<String, Integer> animeSourceTypeMap;
 
     @Autowired
-    public AnimeConverter(String bucketName) {
-        super(bucketName);
+    @Qualifier("animeIdToPathMap")
+    private HashMap<Integer, String> animeIdToPathMap;
+
+    public AnimeConverter() {}
+
+    @PostConstruct
+    private void initializeMaps() {
+        initializeAnimeTypeMap();
+        initializeAnimeStatusTypeMap();
+        initializeAnimeAgeRatingTypeMap();
+        initializeAnimeSeasonTypeMap();
+        initializeAnimeSourceTypeMap();;
     }
 
-    // Think about making a FactoryBean to generate instances of AnimeConverters
-    @PostConstruct
     private void initializeAnimeTypeMap() {
         animeTypeMap = new HashMap<>();
 
@@ -35,7 +44,6 @@ public class AnimeConverter extends Converter {
         }
     }
 
-    @PostConstruct
     private void initializeAnimeStatusTypeMap() {
         animeStatusTypeMap = new HashMap<>();
 
@@ -46,7 +54,6 @@ public class AnimeConverter extends Converter {
         }
     }
 
-    @PostConstruct
     private void initializeAnimeAgeRatingTypeMap() {
         animeAgeRatingTypeMap = new HashMap<>();
 
@@ -61,7 +68,6 @@ public class AnimeConverter extends Converter {
         }
     }
 
-    @PostConstruct
     private void initializeAnimeSeasonTypeMap() {
         animeSeasonTypeMap = new HashMap<>();
 
@@ -72,7 +78,6 @@ public class AnimeConverter extends Converter {
         }
     }
 
-    @PostConstruct
     private void initializeAnimeSourceTypeMap() {
         animeSourceTypeMap = new HashMap<>();
 
@@ -87,41 +92,29 @@ public class AnimeConverter extends Converter {
         return map.containsKey(name) ? map.get(name) : map.getOrDefault("Unknown", 0);
     }
 
-    public void convert(String key) {
-        String[] keySplit = key.split("-");
-        int id = Integer.parseInt(keySplit[keySplit.length - 1]);
-
-        String rawHtml = s3Utils.readObject(bucketName, key);
-        Document doc = Jsoup.parse(rawHtml, "UTF-8");
+    public void convert(int animeId) {
+        String path = animeIdToPathMap.get(animeId);
+        Document doc = parseHtml(path);
         AnimeDetailsPage page = new AnimeDetailsPage(doc);
         Anime anime = new Anime();
 
-        anime.setId(id);
+        anime.setId(animeId);
 
-        // Set type id
+        // Set type, status, age rating, season, and source type ids
         String type = page.parseType();
-        int animeTypeId = getMapping(animeTypeMap, type);
-        anime.setAnimeTypeId(animeTypeId);
+        anime.setAnimeTypeId(getMapping(animeTypeMap, type));
 
-        // Set status type id
         String status = page.parseStatus();
-        int animeStatusTypeId = getMapping(animeStatusTypeMap, status);
-        anime.setAnimeStatusTypeId(animeStatusTypeId);
+        anime.setAnimeStatusTypeId(getMapping(animeStatusTypeMap, status));
 
-        // Set age rating type id
         String rating = page.parseRating();
-        int animeAgeRatingTypeId = getMapping(animeAgeRatingTypeMap, rating);
-        anime.setAnimeAgeRatingTypeId(animeAgeRatingTypeId);
+        anime.setAnimeAgeRatingTypeId(getMapping(animeAgeRatingTypeMap, rating));
 
-        // Set season type id
         String seasonPremiered = page.parsePremiered();
-        int animeSeasonTypeId = getMapping(animeSeasonTypeMap, seasonPremiered);
-        anime.setAnimeSeasonTypeId(animeSeasonTypeId);
+        anime.setAnimeSeasonTypeId(getMapping(animeSeasonTypeMap, seasonPremiered));
 
-        // Set source type id
         String source = page.parseSource();
-        int animeSourceTypeId = getMapping(animeSourceTypeMap, source);
-        anime.setAnimeSourceTypeId(animeSourceTypeId);
+        anime.setAnimeSourceTypeId(getMapping(animeSourceTypeMap, source));
 
         // Set episode information
         String episodeStr = page.parseEpisodes();
@@ -135,17 +128,14 @@ public class AnimeConverter extends Converter {
         String[] malDates = page.parseAired().split(" to ");
         Calendar startDateDB = miscUtils.convertDate(malDates[0]);
         Calendar endDateDB = miscUtils.convertDate(malDates[1]);
-
         anime.setStartDate(startDateDB);
         anime.setEndDate(endDateDB);
 
-        // Set broadcast
+        // Set broadcast, synopsis, and background
         anime.setBroadcast(page.parseBroadcast());
-
-        // Set synopsis and background
         anime.setSynopsis(page.parseSynopsis());
         anime.setBackground(page.parseBackground());
 
-        hibernateUtils.updateMalMapping(id, anime);
+        hibernateUtils.updateMalMapping(animeId, anime);
     }
 }

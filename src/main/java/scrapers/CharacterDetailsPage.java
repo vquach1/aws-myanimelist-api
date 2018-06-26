@@ -5,10 +5,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
+import scrapers.abstractScrapers.MalPage;
 
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,11 +23,19 @@ public class CharacterDetailsPage extends MalPage {
         super(doc);
     }
 
+    /*
+     * Returns the character's English name
+     */
     public String parseName() {
         Element name = doc.selectFirst(nameSelector);
         return ownText(name);
     }
 
+    /*
+     * Returns the character's foreign name. The language depends on
+     * where the show was made. Japanese is prominent, followed by
+     * Chinese or Korean.
+     */
     // TODO: This needs to be revisited. Something seems wonky about the logic here
     public String parseForeignName() {
         Element foreignName = doc.selectFirst(foreignNameSelector);
@@ -49,6 +56,9 @@ public class CharacterDetailsPage extends MalPage {
         return foreignNameText;
     }
 
+    /*
+     * Returns the character's biography
+     */
     public String parseBiography() {
         Element foreignName = doc.selectFirst(foreignNameSelector);
         Node sibling = foreignName.nextSibling();
@@ -64,6 +74,10 @@ public class CharacterDetailsPage extends MalPage {
         return summary.toString();
     }
 
+    /*
+     * Returns the number of members that have marked the character
+     * as one of their favorites
+     */
     public int parseMemberFavorites() {
         Element memberFavorites = doc.selectFirst(memberFavoritesSelector);
 
@@ -75,17 +89,27 @@ public class CharacterDetailsPage extends MalPage {
         return Integer.parseInt(favoritesText);
     }
 
-    /* Maps anime ID -> character role */
+    /*
+     * Returns a map where each key (id of anime that the haracter
+     * appeared in) maps to the character's role (Main/Supporting)
+     */
     public HashMap<Integer, String> parseAnimeography() {
-        return parseAnimeMangaTables(animeographySelector, animeIdPattern);
+        return parseAnimeographyOrMangaography(animeographySelector, animeIdPattern);
     }
 
-    /* Maps manga ID -> character role */
+    /*
+     * Returns a map where each key (id of manga that the character
+     * appeared in) maps to the character's role (Main/Supporting)
+     */
     public HashMap<Integer, String> parseMangaography() {
-        return parseAnimeMangaTables(mangaographySelector, mangaIdPattern);
+        return parseAnimeographyOrMangaography(mangaographySelector, mangaIdPattern);
     }
 
-    /* Maps person ID -> language */
+    /*
+     * Returns a map where each key (id of person that voice
+     * acted the character) maps to the language they voiced the
+     * character in
+     */
     public HashMap<Integer, String> parseVoiceActors() {
         HashMap<Integer, String> map = new HashMap<Integer, String>();
 
@@ -120,8 +144,14 @@ public class CharacterDetailsPage extends MalPage {
         return map;
     }
 
-    private  HashMap<Integer, String> parseAnimeMangaTables(String selector, Pattern pattern) {
-        HashMap<Integer, String> map = new HashMap<Integer, String>();
+    /*
+     * Takes a selector for an animeography or mangeography table and a pattern
+     * to search for anime or manga paths (e.g. anime/31240). Returns a map where
+     * each key (id of anime/manga that the character appeared in) maps to the
+     * character's role
+     */
+    private HashMap<Integer, String> parseAnimeographyOrMangaography(String selector, Pattern pattern) {
+        HashMap<Integer, String> map = new HashMap<>();
 
         try {
             Element outerTable = doc.selectFirst(selector);

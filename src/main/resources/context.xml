@@ -12,6 +12,7 @@
            http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <context:annotation-config/>
+
     <tx:annotation-driven transaction-manager="txManager" />
 
     <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">

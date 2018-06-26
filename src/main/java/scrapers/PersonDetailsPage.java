@@ -3,8 +3,7 @@ package scrapers;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
-import java.text.NumberFormat;
+import scrapers.abstractScrapers.MalPage;
 
 public class PersonDetailsPage extends MalPage {
     private final static String givenNameSelector = "span[class='dark_text']:contains(Given name:)";

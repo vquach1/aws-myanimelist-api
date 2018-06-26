@@ -4,30 +4,35 @@ import hibernateUtils.hibernateObjects.MalCharacter;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import scrapers.CharacterDetailsPage;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class CharacterConverter extends Converter {
-    public CharacterConverter(String bucketName) {
-        super(bucketName);
-    }
+    @Autowired
+    @Qualifier("characterIdToPathMap")
+    private HashMap<Integer, String> characterIdToPathMap;
 
-    public void convert(String key) {
-        String[] keySplit = key.split("-");
-        int id = Integer.parseInt(keySplit[keySplit.length - 1]);
+    public CharacterConverter() {}
 
-        String rawHtml = s3Utils.readObject(bucketName, key);
-        Document doc = Jsoup.parse(rawHtml, "UTF-8");
+    public void convert(int characterId) {
+        String path = characterIdToPathMap.get(characterId);
+        Document doc = parseHtml(path);
         CharacterDetailsPage page = new CharacterDetailsPage(doc);
+        MalCharacter character = new MalCharacter();
+
+        character.setId(characterId);
 
         // Extract favorites
         int favorites = page.parseMemberFavorites();
+        character.setFavorites(favorites);
 
         // Extract English names
         String[] fullName = page.parseName().split(" ");
         String englishFirstName = fullName[0];
-
         String englishLastName;
 
         if (fullName.length == 1) {
@@ -37,20 +42,22 @@ public class CharacterConverter extends Converter {
             englishLastName = String.join(" ", englishLastNameArr);
         }
 
+        character.setEnglishFirstName(englishFirstName);
+        character.setEnglishLastName(englishLastName);
+
         // Extract foreign names
         String foreignNames = page.parseForeignName();
+        character.setForeignNames(foreignNames);
 
         // Extract biography
         String biography = page.parseBiography();
-
         biography = StringUtils.removeEnd(biography, "<br><br>");
         if (biography.equals("No biography written.")) {
             biography = "";
         }
 
-        MalCharacter character = new MalCharacter(id, favorites, englishFirstName, englishLastName,
-                foreignNames, biography);
+        character.setBiography(biography);
 
-        hibernateUtils.updateMalMapping(id, character);
+        hibernateUtils.updateMalMapping(characterId, character);
     }
 }

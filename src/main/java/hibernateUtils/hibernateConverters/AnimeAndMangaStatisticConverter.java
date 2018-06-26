@@ -1,34 +1,32 @@
 package hibernateUtils.hibernateConverters;
 
 import hibernateUtils.hibernateObjects.AnimeMangaStatistic;
-import scrapers.AnimeMangaStatisticPage;
+import scrapers.abstractScrapers.AnimeAndMangaStatisticPage;
 
-public abstract class AnimeMangaStatisticConverter extends Converter {
-    public AnimeMangaStatisticConverter(String bucketName) {
-        super(bucketName);
-    }
+public abstract class AnimeAndMangaStatisticConverter extends Converter {
+    public AnimeAndMangaStatisticConverter() {}
 
-    protected void convertCommonStats(AnimeMangaStatistic stat, AnimeMangaStatisticPage page) {
+    protected void convertCommonStats(AnimeMangaStatistic stat, AnimeAndMangaStatisticPage page) {
         convertCommonPopularityStats(stat, page);
         convertCommonCompletionStats(stat, page);
         convertCommonRatingStats(stat, page);
     }
 
-    private void convertCommonPopularityStats(AnimeMangaStatistic stat, AnimeMangaStatisticPage page) {
+    private void convertCommonPopularityStats(AnimeMangaStatistic stat, AnimeAndMangaStatisticPage page) {
         stat.setScore(page.parseScore());
         stat.setRank(page.parseRanked());
         stat.setPopularity(page.parsePopularity());
         stat.setFavorites(page.parseFavorites());
     }
 
-    private void convertCommonCompletionStats(AnimeMangaStatistic stat, AnimeMangaStatisticPage page) {
+    private void convertCommonCompletionStats(AnimeMangaStatistic stat, AnimeAndMangaStatisticPage page) {
         stat.setCompleted(page.parseCompleted());
         stat.setOnHold(page.parseOnHold());
         stat.setDropped(page.parseDropped());
         stat.setTotal(page.parseTotal());
     }
 
-    private void convertCommonRatingStats(AnimeMangaStatistic stat, AnimeMangaStatisticPage page) {
+    private void convertCommonRatingStats(AnimeMangaStatistic stat, AnimeAndMangaStatisticPage page) {
         float[][] ratings = page.parseRatings();
 
         stat.setRatedOne((int)ratings[1][0]);
