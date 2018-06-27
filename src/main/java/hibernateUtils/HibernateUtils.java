@@ -1,11 +1,16 @@
 package hibernateUtils;
 
 import hibernateUtils.hibernateObjects.*;
+import hibernateUtils.hibernateObjects.abstractHibernateObjects.MalMapping;
 import org.hibernate.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.InstantiationException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,36 +54,33 @@ public class HibernateUtils {
         return mapping;
     }
 
-    public List getRows(String queryStr) {
+    /*
+     * Returns a list of all objects that are found in
+     * the specified Hibernate table. For example, getTableRows(Anime.class)
+     * will return all of the objects (rows) in the Anime table
+     */
+    public List getTableRows(Class classIn) {
+        // Balk if the class is not a mapping for Hibernate
+        if (!MalMapping.class.isAssignableFrom(classIn)) {
+            return new ArrayList();
+        }
+
+        // Retrieve all the rows from the specified table in Hibernate
+        List results = new ArrayList<>();
         Session session = factory.getCurrentSession();
-        Query query = session.createQuery(queryStr);
-        return query.list();
-    }
+        Query query = session.createQuery("from " + classIn.getSimpleName());
+        List rows = query.list();
 
-    // TODO: Not comfortable with how this method is in this class.
-    // Can this be moved to another place? Look up service vs DAO
-    public List<AnimeType> getAnimeTypes() {
-        List<AnimeType> types = (List<AnimeType>)getRows("from AnimeType");
-        return types.stream().map(type -> new AnimeType(type)).collect(Collectors.toList());
-    }
+        // Convert each row into an object of the class's type
+        try {
+            Constructor ctor = classIn.getConstructor(classIn);
+            for (Object obj : rows) {
+                results.add(ctor.newInstance(classIn.cast(obj)));
+            }
+        } catch (NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+        }
 
-    public List<AnimeStatusType> getAnimeStatusTypes() {
-        List<AnimeStatusType> types = (List<AnimeStatusType>)getRows("from AnimeStatusType");
-        return types.stream().map(type -> new AnimeStatusType(type)).collect(Collectors.toList());
-    }
-
-    public List<AnimeAgeRatingType> getAnimeAgeRatingTypes() {
-        List<AnimeAgeRatingType> types = (List<AnimeAgeRatingType>)getRows("from AnimeAgeRatingType");
-        return types.stream().map(type -> new AnimeAgeRatingType(type)).collect(Collectors.toList());
-    }
-
-    public List<AnimeSeasonType> getAnimeSeasonTypes() {
-        List<AnimeSeasonType> types = (List<AnimeSeasonType>)getRows("from AnimeSeasonType");
-        return types.stream().map(type -> new AnimeSeasonType(type)).collect(Collectors.toList());
-    }
-
-    public List<AnimeSourceType> getAnimeSourceTypes() {
-        List<AnimeSourceType> types = (List<AnimeSourceType>)getRows("from AnimeSourceType");
-        return types.stream().map(type -> new AnimeSourceType(type)).collect(Collectors.toList());
+        return results;
     }
 }
