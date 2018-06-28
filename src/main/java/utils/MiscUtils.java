@@ -8,14 +8,17 @@ import java.util.regex.Pattern;
 public class MiscUtils {
     private HashMap<String, String> monthMap;
 
-    private String malDateRegex = "([a-zA-Z]+) (\\d+), (\\d+)";
+    private String malMonthDayYearDateRegex = "([a-zA-Z]+) (\\d+), (\\d{4})";
+    private String malYearDateRegex = "(\\d{4})";
     private String malTimeDurationRegex = "((\\d+) hr. )?(\\d+) min.";
 
-    private Pattern malDatePattern;
+    private Pattern malMonthDayYearDatePattern;
+    private Pattern malYearDatePattern;
     private Pattern malTimeDurationPattern;
 
     public MiscUtils() {
-        malDatePattern = Pattern.compile(malDateRegex);
+        malMonthDayYearDatePattern = Pattern.compile(malMonthDayYearDateRegex);
+        malYearDatePattern = Pattern.compile(malYearDateRegex);
         malTimeDurationPattern = Pattern.compile(malTimeDurationRegex);
 
         initializeMonthMap();
@@ -42,21 +45,48 @@ public class MiscUtils {
     // Honestly, I wouldn't be surprised if there were already a library out there
     // that does this stuff. If there is, we can get rid of a lot of code
     public Calendar convertDate(String malDate) {
-        Matcher matcher = malDatePattern.matcher(malDate);
-        matcher.find();
-
-        if (matcher.groupCount() != 3) {
-            System.out.println("Failed to parse " + malDate);
+        if (malDate.equals("?")) {
             return null;
         }
 
-        int monthNum = Integer.parseInt(monthMap.get(matcher.group(1)));
-        int dayNum = Integer.parseInt(matcher.group(2));
-        int yearNum = Integer.parseInt(matcher.group(3));
+        Calendar date = convertMonthDayYearDate(malDate);
+        if (date == null) {
+            date = convertYearDate(malDate);
+        }
 
-        Calendar malDateDB = Calendar.getInstance();
-        malDateDB.set(yearNum, monthNum, dayNum);
-        return malDateDB;
+        return date;
+    }
+
+    private Calendar convertMonthDayYearDate(String malDate) {
+        try {
+            Matcher matcher = malMonthDayYearDatePattern.matcher(malDate);
+            matcher.find();
+
+            int monthNum = Integer.parseInt(monthMap.get(matcher.group(1)));
+            int dayNum = Integer.parseInt(matcher.group(2));
+            int yearNum = Integer.parseInt(matcher.group(3));
+
+            Calendar malDateDB = Calendar.getInstance();
+            malDateDB.set(yearNum, monthNum, dayNum);
+            return malDateDB;
+        } catch (IllegalStateException e) {
+            return null;
+        }
+    }
+
+    private Calendar convertYearDate(String malDate) {
+        try {
+            Matcher matcher = malYearDatePattern.matcher(malDate);
+            matcher.find();
+
+            int yearNum = Integer.parseInt(matcher.group(1));
+
+            Calendar malDateDB = Calendar.getInstance();
+            malDateDB.set(yearNum, 1, 1);
+            return malDateDB;
+        } catch (IllegalStateException e) {
+            return null;
+        }
     }
 
     public int convertTimeDuration(String malTimeDuration) {

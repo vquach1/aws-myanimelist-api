@@ -1,8 +1,9 @@
 package hibernateUtils.hibernateConverters;
 
-import hibernateUtils.hibernateObjects.Magazine;
-import hibernateUtils.hibernateObjects.MalMapping;
-import hibernateUtils.hibernateObjects.Producer;
+import hibernateUtils.hibernateConverters.abstractConverters.Converter;
+import hibernateUtils.hibernateMappings.mangaMappings.Magazine;
+import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
+import hibernateUtils.hibernateMappings.animeMappings.Producer;
 import org.jsoup.nodes.Document;
 import scrapers.ProducerAndMagazinePage;
 

@@ -33,8 +33,8 @@ public class Downloader {
      * seconds have passed - this is to avoid spamming the web
      * server with requests
      */
-    public void download(String path) {
-        System.out.println("Reived request to download " + path);
+    public synchronized void download(String path) {
+        System.out.println("Received request to download " + path);
 
         Date currTime = new Date();
         long timeWait = timeWaitMillis - (currTime.getTime() - lastDownloadTime.getTime());

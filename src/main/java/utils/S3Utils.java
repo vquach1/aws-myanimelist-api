@@ -23,6 +23,8 @@ public class S3Utils {
     public String readObject(String key) {
         String objectStr = null;
 
+        System.out.println("Attempting to get key " + key);
+
         try {
             StringBuilder objectSB = new StringBuilder();
             String line;
@@ -79,9 +81,10 @@ public class S3Utils {
             Date currDate = new java.util.Date();
             long diffMillis = currDate.getTime() - fileDate.getTime();
             long diffDays = TimeUnit.DAYS.convert(diffMillis, TimeUnit.MILLISECONDS);
+
             return diffDays > 7; // Anything over a week old is outdated
         } catch (AmazonS3Exception exception) {
-            return false;
+            return true;
         }
     }
 

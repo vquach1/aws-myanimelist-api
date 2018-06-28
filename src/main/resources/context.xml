@@ -24,7 +24,7 @@
 
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="packagesToScan" value="hibernateUtils.hibernateObjects" />
+        <property name="packagesToScan" value="hibernateUtils.hibernateMappings" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
@@ -36,8 +36,8 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="hibernateUtils" class="hibernateUtils.HibernateUtils"/>
+    <bean id="hibernateUtils" class="utils.HibernateUtils"/>
 
-    <bean id="ConverterConfig" class="config.ConverterConfig"/>
-    <bean id="UtilsConfig" class="config.UtilsConfig"/>
+    <bean id="ConverterConfig" class="beanConfigs.ConverterConfig"/>
+    <bean id="UtilsConfig" class="beanConfigs.UtilsConfig"/>
 </beans>
