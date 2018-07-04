@@ -1,6 +1,12 @@
 package utils;
 
+import hibernateUtils.hibernateConverters.animeConverters.AnimeConverter;
+import hibernateUtils.hibernateConverters.characterConverters.CharacterConverter;
 import hibernateUtils.hibernateConverters.mangaConverters.MangaConverter;
+import hibernateUtils.hibernateConverters.mangaConverters.MangaStatisticConverter;
+import hibernateUtils.hibernateMappings.GenreType;
+import hibernateUtils.hibernateMappings.animeMappings.Anime;
+import hibernateUtils.hibernateMappings.mangaMappings.MangaStatistic;
 import utils.S3Utils;
 import hibernateUtils.hibernateConverters.*;
 import org.springframework.context.ApplicationContext;
@@ -14,24 +20,21 @@ public class Application{
     public static void main(String[] args) throws Exception {
         ApplicationContext context = new ClassPathXmlApplicationContext("context.xml");
         S3Utils s3Utils = context.getBean(S3Utils.class);
-        HashMap<Integer, String> mangaToIdPathMap = (HashMap<Integer, String>)context.getBean("mangaIdToPathMap");
-
-
-        System.out.println(s3Utils.objectMissingOrOutdated("manga/100/Prism_Palette"));
-        System.out.println(s3Utils.objectMissingOrOutdated("foo"));
-
-        /*
-        ProducerAndMagazineConverter producerAndMagazineConverter =
-                context.getBean(ProducerAndMagazineConverter.class);
-        producerAndMagazineConverter.convert();
-        */
-
+        HashMap<Integer, GenreType> genreMap = (HashMap<Integer, GenreType>)context.getBean("genreTypeMap");
         MangaConverter mangaConverter = context.getBean(MangaConverter.class);
-        int counter = 1;
-        for (Integer id : mangaToIdPathMap.keySet()) {
-            System.out.println("Counter: " + counter + " Id: " + id);
-            mangaConverter.convert(id);
-            counter++;
+        MangaStatisticConverter mangaStatisticConverter = context.getBean(MangaStatisticConverter.class);
+        AnimeConverter animeConverter = context.getBean(AnimeConverter.class);
+        CharacterConverter characterConverter = context.getBean(CharacterConverter.class);
+
+        HashMap<Integer, String> characterToIdPathMap =
+                (HashMap<Integer, String>)context.getBean("characterIdToPathMap");
+        for (Integer id : characterToIdPathMap.keySet()) {
+            try {
+               characterConverter.convert(id);
+            } catch (Exception e) {
+                System.out.println("Error while attempting to process " + characterToIdPathMap.get(id));
+                e.printStackTrace();
+            }
         }
 
         /*

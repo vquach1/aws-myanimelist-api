@@ -1,5 +1,6 @@
 package hibernateUtils.hibernateConverters.abstractConverters;
 
+import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
 import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
 import utils.MiscUtils;
 import utils.S3Utils;
@@ -40,22 +41,35 @@ public abstract class Converter {
     }
 
     /*
-     * Propagates a HashMap with (String, Integer)
+     * Propagates a HashMap with (Name, PairMapping)
      * pairs based on the values retrieved from the specified
      * PairMapping class.
      */
-    protected HashMap<String, Integer> fillNameToIdMap(Class classIn) {
+    protected <T extends PairMapping> void fillNameToElemMap(HashMap<String, T> map, Class classIn) {
         if (!PairMapping.class.isAssignableFrom(classIn)) {
             throw new IllegalArgumentException("The provided class must be a subtype of PairMapping");
         }
 
-        HashMap<String, Integer> nameToIdMap = new HashMap<>();
         List<PairMapping> pMaps = (List<PairMapping>)hibernateUtils.getTableRows(classIn);
-        for (PairMapping pMap: pMaps) {
-            nameToIdMap.put(pMap.getName(), pMap.getId());
+        for (PairMapping pMap : pMaps) {
+            map.put(pMap.getName(), (T)pMap);
+        }
+    }
+
+    /*
+     * Propagates a HashMap with (Id, PairMapping)
+     * pairs based on the values retrieved from the specified
+     * PairMapping class.
+     */
+    protected <T extends PairMapping> void fillIdToElemMap(HashMap<Integer, T> map, Class classIn) {
+        if (!PairMapping.class.isAssignableFrom(classIn)) {
+            throw new IllegalArgumentException("The provided class must be a subtype of PairMapping");
         }
 
-        return nameToIdMap;
+        List<PairMapping> pMaps = (List<PairMapping>)hibernateUtils.getTableRows(classIn);
+        for (PairMapping pMap : pMaps) {
+            map.put(pMap.getId(), (T)pMap);
+        }
     }
 
     /*

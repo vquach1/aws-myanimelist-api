@@ -1,6 +1,8 @@
 package hibernateUtils.hibernateConverters.animeConverters;
 
+import com.amazonaws.util.StringUtils;
 import hibernateUtils.hibernateConverters.abstractConverters.Converter;
+import hibernateUtils.hibernateMappings.GenreType;
 import hibernateUtils.hibernateMappings.animeMappings.*;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 
 public class AnimeConverter extends Converter {
-    private HashMap<String, Integer> animeTypeMap;
-    private HashMap<String, Integer> animeStatusTypeMap;
-    private HashMap<String, Integer> animeAgeRatingTypeMap;
-    private HashMap<String, Integer> animeSeasonTypeMap;
-    private HashMap<String, Integer> animeSourceTypeMap;
+    private HashMap<String, AnimeType> animeTypeMap = new HashMap<>();
+    private HashMap<String, AnimeStatusType> animeStatusTypeMap = new HashMap<>();
+    private HashMap<String, AnimeAgeRatingType> animeAgeRatingTypeMap = new HashMap<>();
+    private HashMap<String, AnimeSeasonType> animeSeasonTypeMap = new HashMap<>();
+    private HashMap<String, AnimeSourceType> animeSourceTypeMap = new HashMap<>();
+
+    private HashMap<String, ProducerType> producerTypeMap = new HashMap<>();
+    private HashMap<Integer, Producer> producerMap = new HashMap<>();
 
     @Autowired
     @Qualifier("animeIdToPathMap")
@@ -27,6 +32,9 @@ public class AnimeConverter extends Converter {
     @Qualifier("mangaIdToPathMap")
     private HashMap<Integer, String> mangaIdToPathMap;
 
+    @Autowired
+    private HashMap<Integer, GenreType> genreTypeMap;
+
     public AnimeConverter() {}
 
     /*
@@ -34,10 +42,12 @@ public class AnimeConverter extends Converter {
      */
     @PostConstruct
     private void initializeMaps() {
-        animeTypeMap = fillNameToIdMap(AnimeType.class);
-        animeStatusTypeMap = fillNameToIdMap(AnimeStatusType.class);
-        animeSeasonTypeMap = fillNameToIdMap(AnimeSeasonType.class);
-        animeSourceTypeMap = fillNameToIdMap(AnimeSourceType.class);
+        fillNameToElemMap(animeTypeMap, AnimeType.class);
+        fillNameToElemMap(animeStatusTypeMap, AnimeStatusType.class);
+        fillNameToElemMap(animeSeasonTypeMap, AnimeSeasonType.class);
+        fillNameToElemMap(animeSourceTypeMap, AnimeSourceType.class);
+        fillNameToElemMap(producerTypeMap, ProducerType.class);
+        fillIdToElemMap(producerMap, Producer.class);
 
         // Done separately, because AnimeAgeRating is a special
         // subtype of PairMapping with a 3rd parameter (a description)
@@ -55,40 +65,36 @@ public class AnimeConverter extends Converter {
         // MAL generally separates the age rating and description with a dash,
         // but it specifically separates with a space for R-17+
         for (AnimeAgeRatingType type : types) {
-            String separator = type.getName().equals("R - 17+") ? " " : " - ";
-            String nameAndDesc = type.getName() + separator + type.getDescription();
+            String nameAndDesc;
+            if (type.getDescription().isEmpty()) {
+                nameAndDesc = type.getName();
+            } else {
+                String separator = type.getName().equals("R - 17+") ? " " : " - ";
+                nameAndDesc = type.getName() + separator + type.getDescription();
+            }
 
-            animeAgeRatingTypeMap.put(nameAndDesc, type.getId());
+            animeAgeRatingTypeMap.put(nameAndDesc, type);
         }
-    }
-
-    private int getMapping(HashMap<String, Integer> map, String name) {
-        return map.containsKey(name) ? map.get(name) : map.getOrDefault("Unknown", 0);
     }
 
     public void convert(int animeId) {
         String path = animeIdToPathMap.get(animeId);
         Document doc = parseHtml(path);
         AnimeDetailsPage page = new AnimeDetailsPage(doc);
-        Anime anime = new Anime();
 
+        if (page.isEmptyPage()) {
+            return;
+        }
+
+        Anime anime = new Anime();
         anime.setId(animeId);
 
         // Set type, status, age rating, season, and source type ids
-        String type = page.parseType();
-        anime.setAnimeTypeId(getMapping(animeTypeMap, type));
-
-        String status = page.parseStatus();
-        anime.setAnimeStatusTypeId(getMapping(animeStatusTypeMap, status));
-
-        String rating = page.parseRating();
-        anime.setAnimeAgeRatingTypeId(getMapping(animeAgeRatingTypeMap, rating));
-
-        String seasonPremiered = page.parsePremiered();
-        anime.setAnimeSeasonTypeId(getMapping(animeSeasonTypeMap, seasonPremiered));
-
-        String source = page.parseSource();
-        anime.setAnimeSourceTypeId(getMapping(animeSourceTypeMap, source));
+        anime.setAnimeType(animeTypeMap.get(page.parseType()));
+        anime.setAnimeStatusType(animeStatusTypeMap.get(page.parseStatus()));
+        anime.setAnimeAgeRatingType(animeAgeRatingTypeMap.get(page.parseRating()));
+        anime.setAnimeSeasonType(animeSeasonTypeMap.get(page.parsePremiered()));
+        anime.setAnimeSourceType(animeSourceTypeMap.get(page.parseSource()));
 
         // Set episode information
         String episodeStr = page.parseEpisodes();
@@ -114,7 +120,36 @@ public class AnimeConverter extends Converter {
         // Set broadcast, synopsis, and background
         anime.setBroadcast(page.parseBroadcast());
         anime.setSynopsis(page.parseSynopsis());
-        anime.setBackground(page.parseBackground());
+
+        String backgroundStr = page.parseBackground();
+        if (StringUtils.beginsWithIgnoreCase(backgroundStr,
+                "No background information has been added to this title.")) {
+            backgroundStr = "";
+        }
+
+        anime.setBackground(backgroundStr);
+
+        // Set genres
+        List<Integer> genreIds = page.parseGenres();
+        for (int gId : genreIds) {
+            anime.getGenreTypes().add(genreTypeMap.get(gId));
+        }
+
+        // Set producer ids
+        List<Integer> studioIds = page.parseStudios();
+        for (int sId : studioIds) {
+            anime.getProducerToRole().put(producerMap.get(sId), producerTypeMap.get("Studio"));
+        }
+
+        List<Integer> producerIds = page.parseProducers();
+        for (int pId : producerIds) {
+            anime.getProducerToRole().put(producerMap.get(pId), producerTypeMap.get("Producer"));
+        }
+
+        List<Integer> licensorIds = page.parseLicensors();
+        for (int lId : licensorIds) {
+            anime.getProducerToRole().put(producerMap.get(lId), producerTypeMap.get("Licensor"));
+        }
 
         hibernateUtils.updateMalMapping(animeId, anime);
     }

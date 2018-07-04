@@ -27,6 +27,8 @@ abstract public class MalPage{
     protected static Pattern personIdPattern = Pattern.compile(personIdRegex);
     protected static Pattern genreIdPattern = Pattern.compile(genreIdRegex);
 
+    protected String invalidIdSelector = "div[class='badresult']:contains(Invalid ID provided.)";
+
     public MalPage(Document doc) {
         this.doc = doc;
     }
@@ -56,5 +58,9 @@ abstract public class MalPage{
 
     public int parseNumber(String numberStr) {
         return Integer.parseInt(numberStr.replace(",", ""));
+    }
+
+    public boolean isEmptyPage() {
+        return !doc.hasText() || doc.selectFirst(invalidIdSelector) != null;
     }
 }

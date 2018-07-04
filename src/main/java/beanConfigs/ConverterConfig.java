@@ -7,7 +7,9 @@ import hibernateUtils.hibernateConverters.characterConverters.CharacterConverter
 import hibernateUtils.hibernateConverters.mangaConverters.MangaConverter;
 import hibernateUtils.hibernateConverters.mangaConverters.MangaStatisticConverter;
 import hibernateUtils.hibernateConverters.personConverters.PersonConverter;
+import hibernateUtils.hibernateMappings.GenreType;
 import utils.Downloader;
+import utils.HibernateUtils;
 import utils.S3Utils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Configuration
 public class ConverterConfig {
@@ -26,7 +29,12 @@ public class ConverterConfig {
     private S3Utils s3Utils;
 
     @Autowired
+    private HibernateUtils hibernateUtils;
+
+    @Autowired
     private Downloader downloader;
+
+    //region Converters
 
     @Bean
     public AnimeConverter animeConverter() {
@@ -63,6 +71,20 @@ public class ConverterConfig {
         return new ProducerAndMagazineConverter();
     }
 
+    //endregion
+
+    @Bean
+    public HashMap<Integer, GenreType> genreTypeMap() {
+        List<GenreType> genreTypes = (List<GenreType>)hibernateUtils.getTableRows(GenreType.class);
+        HashMap<Integer, GenreType> map = new HashMap<>();
+
+        for (GenreType type : genreTypes) {
+            map.put(type.getId(), type);
+        }
+
+        return map;
+    }
+
     @Bean
     public HashMap<Integer, String> animeIdToPathMap() {
         HashMap<Integer, String> map = new HashMap<>();
@@ -91,6 +113,7 @@ public class ConverterConfig {
         insertIdPathPairs(map, "sitemap/people-000.xml");
         return map;
     }
+
     private void insertIdPathPairs(HashMap<Integer, String> map, String s3IndexPath) {
         if (s3Utils.objectMissingOrOutdated(s3IndexPath)) {
             downloader.download(s3IndexPath);

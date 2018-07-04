@@ -22,8 +22,13 @@ public class CharacterConverter extends Converter {
         String path = characterIdToPathMap.get(characterId);
         Document doc = parseHtml(path);
         CharacterDetailsPage page = new CharacterDetailsPage(doc);
-        MalCharacter character = new MalCharacter();
 
+        if (page.isEmptyPage()) {
+            System.out.println(path + " is empty");
+            return;
+        }
+
+        MalCharacter character = new MalCharacter();
         character.setId(characterId);
 
         // Extract favorites

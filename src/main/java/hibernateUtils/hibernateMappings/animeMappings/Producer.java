@@ -1,12 +1,9 @@
 package hibernateUtils.hibernateMappings.animeMappings;
 
-import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
 import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "myanimelist.producers")

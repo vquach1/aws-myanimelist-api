@@ -10,7 +10,7 @@ public class MiscUtils {
 
     private String malMonthDayYearDateRegex = "([a-zA-Z]+) (\\d+), (\\d{4})";
     private String malYearDateRegex = "(\\d{4})";
-    private String malTimeDurationRegex = "((\\d+) hr. )?(\\d+) min.";
+    private String malTimeDurationRegex = "((\\d+) hr.)?( )?((\\d+) min.)?";
 
     private Pattern malMonthDayYearDatePattern;
     private Pattern malYearDatePattern;
@@ -91,15 +91,15 @@ public class MiscUtils {
 
     public int convertTimeDuration(String malTimeDuration) {
         Matcher matcher = malTimeDurationPattern.matcher(malTimeDuration);
-        matcher.find();
 
-        if (matcher.groupCount() != 3) {
+        try {
+            matcher.find();
+
+            int hours = matcher.group(2) == null ? 0 : Integer.valueOf(matcher.group(2));
+            int minutes = matcher.group(5) == null ? 0 : Integer.valueOf(matcher.group(5));
+            return hours * 60 + minutes;
+        } catch (IllegalStateException e) {
             return 0;
         }
-
-        int hours = matcher.group(2) == null ? 0 : Integer.valueOf(matcher.group(2));
-        int minutes = matcher.group(3) == null ? 0 : Integer.valueOf(matcher.group(3));
-
-        return hours * 60 + minutes;
     }
 }

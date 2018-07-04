@@ -1,34 +1,19 @@
 package hibernateUtils.hibernateMappings.animeMappings;
 
+import hibernateUtils.hibernateMappings.GenreType;
 import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.util.Calendar;
+import javax.persistence.*;
+import java.util.*;
 
 @Entity
 @Table(name = "myanimelist.anime")
 public class Anime extends MalMapping {
+    //#region Basic fields
+
     @Id
     @Column(name = "id")
     private int id;
-
-    @Column(name = "anime_type_id")
-    private int animeTypeId;
-
-    @Column(name = "anime_status_type_id")
-    private int animeStatusTypeId;
-
-    @Column(name = "anime_age_rating_type_id")
-    private int animeAgeRatingTypeId;
-
-    @Column(name = "anime_season_type_id")
-    private int animeSeasonTypeId;
-
-    @Column(name = "anime_source_type_id")
-    private int animeSourceTypeId;
 
     @Column(name = "num_episodes")
     private int numEpisodes;
@@ -51,6 +36,46 @@ public class Anime extends MalMapping {
     @Column(name = "background")
     private String background;
 
+    //endregion
+
+    //region JoinColumns and JoinTables
+
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+        name = "myanimelist.anime_genres",
+        joinColumns = { @JoinColumn(name = "anime_id") },
+        inverseJoinColumns = { @JoinColumn(name = "genre_type_id") })
+    private Set<GenreType> genreTypes = new HashSet<>();
+
+    @JoinTable(name = "myanimelist.anime_producers",
+        joinColumns = { @JoinColumn(name = "anime_id") },
+        inverseJoinColumns = { @JoinColumn(name = "producer_type_id") })
+    @MapKeyJoinColumn(name = "producer_id")
+    @ElementCollection
+    private Map<Producer, ProducerType> producerToRole = new HashMap<>();
+
+    @ManyToOne
+    @JoinColumn(name = "anime_type_id")
+    private AnimeType animeType;
+
+    @ManyToOne
+    @JoinColumn(name = "anime_status_type_id")
+    private AnimeStatusType animeStatusType;
+
+    @ManyToOne
+    @JoinColumn(name = "anime_age_rating_type_id")
+    private AnimeAgeRatingType animeAgeRatingType;
+
+    @ManyToOne
+    @JoinColumn(name = "anime_season_type_id")
+    private AnimeSeasonType animeSeasonType;
+
+    @ManyToOne
+    @JoinColumn(name = "anime_source_type_id")
+    private AnimeSourceType animeSourceType;
+
+    //endregion
+
     public Anime() {}
 
     public int getId() {
@@ -61,45 +86,7 @@ public class Anime extends MalMapping {
         this.id = id;
     }
 
-    public int getAnimeTypeId() {
-        return animeTypeId;
-    }
-
-    public void setAnimeTypeId(int animeTypeId) {
-        this.animeTypeId = animeTypeId;
-    }
-
-    public int getAnimeStatusTypeId() {
-        return animeStatusTypeId;
-    }
-
-    public void setAnimeStatusTypeId(int animeStatusTypeId) {
-        this.animeStatusTypeId = animeStatusTypeId;
-    }
-
-    public int getAnimeAgeRatingTypeId() {
-        return animeAgeRatingTypeId;
-    }
-
-    public void setAnimeAgeRatingTypeId(int animeAgeRatingTypeId) {
-        this.animeAgeRatingTypeId = animeAgeRatingTypeId;
-    }
-
-    public int getAnimeSeasonTypeId() {
-        return animeSeasonTypeId;
-    }
-
-    public void setAnimeSeasonTypeId(int animeSeasonTypeId) {
-        this.animeSeasonTypeId = animeSeasonTypeId;
-    }
-
-    public int getAnimeSourceTypeId() {
-        return animeSourceTypeId;
-    }
-
-    public void setAnimeSourceTypeId(int animeSourceTypeId) {
-        this.animeSourceTypeId = animeSourceTypeId;
-    }
+    //region Table Getters and Setters
 
     public int getNumEpisodes() {
         return numEpisodes;
@@ -156,4 +143,66 @@ public class Anime extends MalMapping {
     public void setBackground(String background) {
         this.background = background;
     }
+
+    //endregion
+
+    //region JoinTable or JoinColumn Getters and Setters
+
+    public AnimeType getAnimeType() {
+        return animeType;
+    }
+
+    public void setAnimeType(AnimeType animeType) {
+        this.animeType = animeType;
+    }
+
+    public Set<GenreType> getGenreTypes() {
+        return genreTypes;
+    }
+
+    public void setGenreTypes(Set<GenreType> genreTypes) {
+        this.genreTypes = genreTypes;
+    }
+
+    public Map<Producer, ProducerType> getProducerToRole() {
+        return producerToRole;
+    }
+
+    public void setProducerToRole(Map<Producer, ProducerType> producerToRole) {
+        this.producerToRole = producerToRole;
+    }
+
+    public AnimeStatusType getAnimeStatusType() {
+        return animeStatusType;
+    }
+
+    public void setAnimeStatusType(AnimeStatusType animeStatusType) {
+        this.animeStatusType = animeStatusType;
+    }
+
+    public AnimeAgeRatingType getAnimeAgeRatingType() {
+        return animeAgeRatingType;
+    }
+
+    public void setAnimeAgeRatingType(AnimeAgeRatingType animeAgeRatingType) {
+        this.animeAgeRatingType = animeAgeRatingType;
+    }
+
+    public AnimeSeasonType getAnimeSeasonType() {
+        return animeSeasonType;
+    }
+
+    public void setAnimeSeasonType(AnimeSeasonType animeSeasonType) {
+        this.animeSeasonType = animeSeasonType;
+    }
+
+    public AnimeSourceType getAnimeSourceType() {
+        return animeSourceType;
+    }
+
+    public void setAnimeSourceType(AnimeSourceType animeSourceType) {
+        this.animeSourceType = animeSourceType;
+    }
+
+    //endregion
 }

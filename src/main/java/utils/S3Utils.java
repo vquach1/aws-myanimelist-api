@@ -23,7 +23,7 @@ public class S3Utils {
     public String readObject(String key) {
         String objectStr = null;
 
-        System.out.println("Attempting to get key " + key);
+        //System.out.println("Attempting to get key " + key);
 
         try {
             StringBuilder objectSB = new StringBuilder();
@@ -39,6 +39,9 @@ public class S3Utils {
 
             objectStr = objectSB.toString();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (AmazonS3Exception e) {
+            System.out.println("Attempted to grab " + key + " which does not exist");
             e.printStackTrace();
         }
 
@@ -82,7 +85,9 @@ public class S3Utils {
             long diffMillis = currDate.getTime() - fileDate.getTime();
             long diffDays = TimeUnit.DAYS.convert(diffMillis, TimeUnit.MILLISECONDS);
 
-            return diffDays > 7; // Anything over a week old is outdated
+            return diffDays > 200;
+
+            //return diffDays > 7; // Anything over a week old is outdated
         } catch (AmazonS3Exception exception) {
             return true;
         }

@@ -21,8 +21,12 @@ public class PersonConverter extends Converter {
         String path = peopleIdToPathMap.get(personId);
         Document doc = parseHtml(path);;
         PersonDetailsPage page = new PersonDetailsPage(doc);
-        Person person = new Person();
 
+        if (page.isEmptyPage()) {
+            return;
+        }
+
+        Person person = new Person();
         person.setId(personId);
 
         // Parse English and foreign names. To simplify things,

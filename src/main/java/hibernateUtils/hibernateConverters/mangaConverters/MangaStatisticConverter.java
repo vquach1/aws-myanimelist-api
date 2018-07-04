@@ -20,6 +20,11 @@ public class MangaStatisticConverter extends AnimeAndMangaStatisticConverter {
         String path = mangaIdToPathMap.get(mangaId) + "/stats";
         Document doc = parseHtml(path);
         MangaStatisticPage page = new MangaStatisticPage(doc);
+
+        if (page.isEmptyPage()) {
+            return;
+        }
+
         MangaStatistic mangaStat = new MangaStatistic();
 
         // Set statistics shared by anime and manga statistics

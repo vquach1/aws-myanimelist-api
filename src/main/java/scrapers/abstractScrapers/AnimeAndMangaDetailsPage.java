@@ -27,8 +27,8 @@ public class AnimeAndMangaDetailsPage extends MalPage {
     }
 
     public String parseType() {
-        Element type = nextElementSibling(typeSelector);
-        return ownText(type);
+        Element type = parent(typeSelector);
+        return type.children().size() == 1 ? ownText(type) : ownText(type.child(1));
     }
 
     public String parseStatus() {

@@ -2,24 +2,17 @@ package hibernateUtils.hibernateMappings.mangaMappings;
 
 import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Calendar;
 
 @Entity
 @Table(name = "myanimelist.manga")
 public class Manga extends MalMapping {
+    //region Ordinary Fields
+
     @Id
     @Column(name = "id")
     private int id;
-
-    @Column(name = "manga_type_id")
-    private int mangaTypeId;
-
-    @Column(name = "manga_status_type_id")
-    private int mangaStatusTypeId;
 
     @Column(name = "synopsis")
     private String synopsis;
@@ -39,8 +32,23 @@ public class Manga extends MalMapping {
     @Column(name = "end_date")
     private Calendar endDate;
 
-    @Column(name = "magazine_id")
-    private int magazineId;
+    //endregion
+
+    //region JoinColumns and JoinTables
+
+    @ManyToOne
+    @JoinColumn(name = "manga_type_id")
+    private MangaType mangaType;
+
+    @ManyToOne
+    @JoinColumn(name = "manga_status_type_id")
+    private MangaStatusType mangaStatusType;
+
+    @ManyToOne
+    @JoinColumn(name = "magazine_id")
+    private Magazine magazine;
+
+    //endregion
 
     public int getId() {
         return id;
@@ -48,22 +56,6 @@ public class Manga extends MalMapping {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getMangaTypeId() {
-        return mangaTypeId;
-    }
-
-    public void setMangaTypeId(int mangaTypeId) {
-        this.mangaTypeId = mangaTypeId;
-    }
-
-    public int getMangaStatusTypeId() {
-        return mangaStatusTypeId;
-    }
-
-    public void setMangaStatusTypeId(int mangaStatusTypeId) {
-        this.mangaStatusTypeId = mangaStatusTypeId;
     }
 
     public String getSynopsis() {
@@ -114,11 +106,27 @@ public class Manga extends MalMapping {
         this.endDate = endDate;
     }
 
-    public int getMagazineId() {
-        return magazineId;
+    public MangaType getMangaType() {
+        return mangaType;
     }
 
-    public void setMagazineId(int magazineId) {
-        this.magazineId = magazineId;
+    public void setMangaType(MangaType mangaType) {
+        this.mangaType = mangaType;
+    }
+
+    public MangaStatusType getMangaStatusType() {
+        return mangaStatusType;
+    }
+
+    public void setMangaStatusType(MangaStatusType mangaStatusType) {
+        this.mangaStatusType = mangaStatusType;
+    }
+
+    public Magazine getMagazine() {
+        return magazine;
+    }
+
+    public void setMagazine(Magazine magazine) {
+        this.magazine = magazine;
     }
 }
