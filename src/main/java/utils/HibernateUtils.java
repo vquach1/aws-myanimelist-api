@@ -3,6 +3,7 @@ package utils;
 import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
 import org.hibernate.*;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,36 +11,38 @@ import java.lang.InstantiationException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-@SuppressWarnings("unchecked")
 @Transactional
 public class HibernateUtils {
     @Autowired
     private SessionFactory factory;
 
-    public void updateMalMappings(HashMap<Integer, MalMapping> idToMalMappingMap) {
-        for (Integer id : idToMalMappingMap.keySet()) {
-            updateMalMapping(id, idToMalMappingMap.get(id));
+    public void saveOrUpdateMalMappings(Collection<MalMapping> malMappings) {
+        for (MalMapping map: malMappings) {
+            saveOrUpdateMalMapping(map);
         }
     }
 
+    /*
     public void updateMalMapping(int id, MalMapping mapping) {
         Session session = factory.getCurrentSession();
         MalMapping oldMapping = getMalMapping(id, mapping.getClass());
 
         if (oldMapping == null) {
-            addMalMapping(mapping);
+            saveOrUpdateMalMapping(mapping);
         } else {
             oldMapping.update(mapping);
             session.update(oldMapping); // TODO: Find out whether this line is necessary
         }
     }
+    */
 
-    public void addMalMapping(MalMapping mapping) {
+    public void saveOrUpdateMalMapping(MalMapping mapping) {
         Session session = factory.getCurrentSession();
-        session.save(mapping);
+        session.saveOrUpdate(mapping);
     }
 
     public MalMapping getMalMapping(int id, Class className) {

@@ -4,8 +4,10 @@ import utils.S3Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
@@ -55,6 +57,11 @@ public class Downloader {
             connection.setRequestProperty("User-Agent", "Ocarina MAL Scrape 1.0");
             connection.setRequestProperty("From", "vitungquach1494@gmail.com");
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+            if (connection.getResponseCode() == 404) {
+                System.out.println("404 for " + path);
+            }
+
             lastDownloadTime = new Date();
 
             String line;
@@ -63,7 +70,7 @@ public class Downloader {
             }
 
             reader.close();
-        } catch (Exception e) {}
+        } catch (IOException e) {}
 
         s3Utils.putObject(path, content.toString());
         System.out.println("Finished downloading " + path);

@@ -4,8 +4,8 @@ import com.amazonaws.util.StringUtils;
 import hibernateUtils.hibernateConverters.abstractConverters.Converter;
 import hibernateUtils.hibernateMappings.mangaMappings.Magazine;
 import hibernateUtils.hibernateMappings.mangaMappings.Manga;
-import hibernateUtils.hibernateMappings.mangaMappings.MangaStatusType;
-import hibernateUtils.hibernateMappings.mangaMappings.MangaType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.MangaStatusType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.MangaType;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,7 +14,6 @@ import scrapers.mangaScrapers.MangaDetailsPage;
 import javax.annotation.PostConstruct;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 
 public class MangaConverter extends Converter {
     private HashMap<String, MangaType> mangaTypeMap = new HashMap<>();
@@ -89,6 +88,6 @@ public class MangaConverter extends Converter {
         }
         manga.setBackground(backgroundStr);
 
-        hibernateUtils.updateMalMapping(mangaId, manga);
+        hibernateUtils.saveOrUpdateMalMapping(manga);
     }
 }

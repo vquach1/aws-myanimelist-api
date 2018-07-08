@@ -1,7 +1,11 @@
 package hibernateUtils.hibernateMappings.animeMappings;
 
-import hibernateUtils.hibernateMappings.GenreType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.GenreType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.RelatedType;
 import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
+import hibernateUtils.hibernateMappings.characterMappings.MalCharacter;
+import hibernateUtils.hibernateMappings.lookupTableMappings.MalCharacterRoleType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.*;
 
 import javax.persistence.*;
 import java.util.*;
@@ -14,6 +18,15 @@ public class Anime extends MalMapping {
     @Id
     @Column(name = "id")
     private int id;
+
+    @Column(name = "main_title")
+    private String mainTitle;
+
+    @Column(name = "english_title")
+    private String englishTitle;
+
+    @Column(name = "japanese_title")
+    private String japaneseTitle;
 
     @Column(name = "num_episodes")
     private int numEpisodes;
@@ -54,6 +67,20 @@ public class Anime extends MalMapping {
     @ElementCollection
     private Map<Producer, ProducerType> producerToRole = new HashMap<>();
 
+    @JoinTable(name = "myanimelist.anime_related",
+        joinColumns = { @JoinColumn(name = "anime_id1") },
+        inverseJoinColumns = { @JoinColumn(name = "related_type_id") })
+    @MapKeyJoinColumn(name = "anime_id2")
+    @ElementCollection
+    private Map<Anime, RelatedType> relatedAnimes = new HashMap<>();
+
+    @JoinTable(name = "myanimelist.anime_characters",
+        joinColumns = { @JoinColumn(name = "anime_id") },
+        inverseJoinColumns = { @JoinColumn(name = "character_role_type_id")})
+    @MapKeyJoinColumn(name = "character_id")
+    @ElementCollection
+    private Map<MalCharacter, MalCharacterRoleType> characterRoles = new HashMap<>();
+
     @ManyToOne
     @JoinColumn(name = "anime_type_id")
     private AnimeType animeType;
@@ -74,9 +101,14 @@ public class Anime extends MalMapping {
     @JoinColumn(name = "anime_source_type_id")
     private AnimeSourceType animeSourceType;
 
+    @OneToMany(mappedBy = "anime")
+    private Set<AnimeSynonymTitle> animeSynonymTitles;
+
     //endregion
 
     public Anime() {}
+
+    //region Table Getters and Setters
 
     public int getId() {
         return id;
@@ -86,7 +118,29 @@ public class Anime extends MalMapping {
         this.id = id;
     }
 
-    //region Table Getters and Setters
+    public String getMainTitle() {
+        return mainTitle;
+    }
+
+    public void setMainTitle(String mainTitle) {
+        this.mainTitle = mainTitle;
+    }
+
+    public String getEnglishTitle() {
+        return englishTitle;
+    }
+
+    public void setEnglishTitle(String englishTitle) {
+        this.englishTitle = englishTitle;
+    }
+
+    public String getJapaneseTitle() {
+        return japaneseTitle;
+    }
+
+    public void setJapaneseTitle(String japaneseTitle) {
+        this.japaneseTitle = japaneseTitle;
+    }
 
     public int getNumEpisodes() {
         return numEpisodes;
@@ -172,6 +226,22 @@ public class Anime extends MalMapping {
         this.producerToRole = producerToRole;
     }
 
+    public Map<Anime, RelatedType> getRelatedAnimes() {
+        return relatedAnimes;
+    }
+
+    public void setRelatedAnimes(Map<Anime, RelatedType> relatedAnimes) {
+        this.relatedAnimes = relatedAnimes;
+    }
+
+    public Map<MalCharacter, MalCharacterRoleType> getCharacterRoles() {
+        return characterRoles;
+    }
+
+    public void setCharacterRoles(Map<MalCharacter, MalCharacterRoleType> characterRoles) {
+        this.characterRoles = characterRoles;
+    }
+
     public AnimeStatusType getAnimeStatusType() {
         return animeStatusType;
     }
@@ -202,6 +272,14 @@ public class Anime extends MalMapping {
 
     public void setAnimeSourceType(AnimeSourceType animeSourceType) {
         this.animeSourceType = animeSourceType;
+    }
+
+    public Set<AnimeSynonymTitle> getAnimeSynonymTitles() {
+        return animeSynonymTitles;
+    }
+
+    public void setAnimeSynonymTitles(Set<AnimeSynonymTitle> animeSynonymTitles) {
+        this.animeSynonymTitles = animeSynonymTitles;
     }
 
     //endregion

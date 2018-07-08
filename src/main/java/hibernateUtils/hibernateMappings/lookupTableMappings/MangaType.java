@@ -1,6 +1,7 @@
-package hibernateUtils.hibernateMappings.mangaMappings;
+package hibernateUtils.hibernateMappings.lookupTableMappings;
 
-import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
+import hibernateUtils.hibernateMappings.abstractMappings.LookupTable;
+import hibernateUtils.hibernateMappings.mangaMappings.Manga;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -8,14 +9,14 @@ import javax.persistence.Table;
 import java.util.Set;
 
 @Entity
-@Table(name = "myanimelist.manga_status_types")
-public class MangaStatusType extends PairMapping {
-    @OneToMany(mappedBy = "mangaStatusType")
+@Table(name = "myanimelist.manga_types")
+public class MangaType extends LookupTable {
+    @OneToMany(mappedBy = "mangaType")
     private Set<Manga> mangas;
 
-    public MangaStatusType() {}
+    public MangaType() {}
 
-    public MangaStatusType(MangaStatusType other) {
+    public MangaType(MangaType other) {
         this.id = other.id;
         this.name = other.name.trim();
     }

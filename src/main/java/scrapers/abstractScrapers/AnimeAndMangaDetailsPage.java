@@ -12,6 +12,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AnimeAndMangaDetailsPage extends MalPage {
+    private static final String englishTitleSelector = "span[class='dark_text']:contains(English:)";
+    private static final String japaneseTitleSelector = "span[class='dark_text']:contains(Japanese:)";
+    private static final String synonymTitleSelector = "span[class='dark_text']:contains(Synonyms:)";
     private static final String typeSelector = "span[class='dark_text']:contains(Type:)";
     private static final String statusSelector = "span[class='dark_text']:contains(Status:)";
     private static final String genreSelector = "span[class='dark_text']:contains(Genres:)";
@@ -22,8 +25,24 @@ public class AnimeAndMangaDetailsPage extends MalPage {
         super(doc);
     }
 
-    public String parseTitle() {
+    public String parseMainTitle() {
         return StringUtils.removeEnd(doc.title(), " - MyAnimeList.net");
+    }
+
+    public String parseEnglishTitle() {
+        Element englishTitle = parent(englishTitleSelector);
+        return ownText(englishTitle);
+    }
+
+    public String parseJapaneseTitle() {
+        Element japaneseTitle = parent(japaneseTitleSelector);
+        return ownText(japaneseTitle);
+    }
+
+    public String[] parseSynonymTitles() {
+        Element synonymTitles = parent(synonymTitleSelector);
+        String titles = ownText(synonymTitles);
+        return titles.equals("") ? new String[0] : titles.split(", ");
     }
 
     public String parseType() {
@@ -36,6 +55,7 @@ public class AnimeAndMangaDetailsPage extends MalPage {
         return ownText(status);
     }
 
+    // TODO: Refactor this to make it clear what the purpose of this is
     public List<Integer> parseIds(String selector, Pattern pattern) {
         Element elem = parent(selector);
         List<Integer> ids = new ArrayList<>();

@@ -1,11 +1,8 @@
 package hibernateUtils.hibernateConverters.abstractConverters;
 
-import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
-import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
-import utils.MiscUtils;
-import utils.S3Utils;
-import utils.Downloader;
-import utils.HibernateUtils;
+import hibernateUtils.hibernateMappings.abstractMappings.LookupTable;
+import org.springframework.core.task.TaskExecutor;
+import utils.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +23,12 @@ public abstract class Converter {
     @Autowired
     protected Downloader downloader;
 
+    @Autowired
+    protected TaskExecutor taskExecutor;
+
+    @Autowired
+    protected Graph<Runnable> dependencyGraph;
+
     public Converter() {}
 
     /*
@@ -41,33 +44,33 @@ public abstract class Converter {
     }
 
     /*
-     * Propagates a HashMap with (Name, PairMapping)
+     * Propagates a HashMap with (Name, LookupTable)
      * pairs based on the values retrieved from the specified
-     * PairMapping class.
+     * LookupTable class.
      */
-    protected <T extends PairMapping> void fillNameToElemMap(HashMap<String, T> map, Class classIn) {
-        if (!PairMapping.class.isAssignableFrom(classIn)) {
-            throw new IllegalArgumentException("The provided class must be a subtype of PairMapping");
+    protected <T extends LookupTable> void fillNameToElemMap(HashMap<String, T> map, Class classIn) {
+        if (!LookupTable.class.isAssignableFrom(classIn)) {
+            throw new IllegalArgumentException("The provided class must be a subtype of LookupTable");
         }
 
-        List<PairMapping> pMaps = (List<PairMapping>)hibernateUtils.getTableRows(classIn);
-        for (PairMapping pMap : pMaps) {
+        List<LookupTable> pMaps = (List<LookupTable>)hibernateUtils.getTableRows(classIn);
+        for (LookupTable pMap : pMaps) {
             map.put(pMap.getName(), (T)pMap);
         }
     }
 
     /*
-     * Propagates a HashMap with (Id, PairMapping)
+     * Propagates a HashMap with (Id, LookupTable)
      * pairs based on the values retrieved from the specified
-     * PairMapping class.
+     * LookupTable class.
      */
-    protected <T extends PairMapping> void fillIdToElemMap(HashMap<Integer, T> map, Class classIn) {
-        if (!PairMapping.class.isAssignableFrom(classIn)) {
-            throw new IllegalArgumentException("The provided class must be a subtype of PairMapping");
+    protected <T extends LookupTable> void fillIdToElemMap(HashMap<Integer, T> map, Class classIn) {
+        if (!LookupTable.class.isAssignableFrom(classIn)) {
+            throw new IllegalArgumentException("The provided class must be a subtype of LookupTable");
         }
 
-        List<PairMapping> pMaps = (List<PairMapping>)hibernateUtils.getTableRows(classIn);
-        for (PairMapping pMap : pMaps) {
+        List<LookupTable> pMaps = (List<LookupTable>)hibernateUtils.getTableRows(classIn);
+        for (LookupTable pMap : pMaps) {
             map.put(pMap.getId(), (T)pMap);
         }
     }

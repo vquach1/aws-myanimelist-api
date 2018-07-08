@@ -1,13 +1,12 @@
 package hibernateUtils.hibernateMappings.animeMappings;
 
-import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
+import hibernateUtils.hibernateMappings.abstractMappings.LookupTable;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "myanimelist.producers")
-public class Producer extends PairMapping {
+public class Producer extends LookupTable {
     public Producer() {}
 
     public Producer(Producer other) {

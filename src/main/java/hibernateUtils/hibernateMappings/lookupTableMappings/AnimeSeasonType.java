@@ -1,6 +1,7 @@
-package hibernateUtils.hibernateMappings.animeMappings;
+package hibernateUtils.hibernateMappings.lookupTableMappings;
 
-import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
+import hibernateUtils.hibernateMappings.abstractMappings.LookupTable;
+import hibernateUtils.hibernateMappings.animeMappings.Anime;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -9,7 +10,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "myanimelist.anime_season_types")
-public class AnimeSeasonType extends PairMapping {
+public class AnimeSeasonType extends LookupTable {
     @OneToMany(mappedBy = "animeSeasonType")
     private Set<Anime> animes;
 

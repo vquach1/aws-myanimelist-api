@@ -1,6 +1,6 @@
-package hibernateUtils.hibernateMappings;
+package hibernateUtils.hibernateMappings.lookupTableMappings;
 
-import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
+import hibernateUtils.hibernateMappings.abstractMappings.LookupTable;
 import hibernateUtils.hibernateMappings.animeMappings.Anime;
 
 import javax.persistence.Entity;
@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "myanimelist.genre_types")
-public class GenreType extends PairMapping {
+public class GenreType extends LookupTable {
     @ManyToMany(mappedBy = "genreTypes")
     private Set<Anime> animes = new HashSet<>();
 

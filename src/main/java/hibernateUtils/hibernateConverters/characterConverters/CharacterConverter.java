@@ -63,6 +63,6 @@ public class CharacterConverter extends Converter {
 
         character.setBiography(biography);
 
-        hibernateUtils.updateMalMapping(characterId, character);
+        hibernateUtils.saveOrUpdateMalMapping(character);
     }
 }

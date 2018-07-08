@@ -13,7 +13,7 @@ import javax.persistence.MappedSuperclass;
  */
 
 @MappedSuperclass
-public class PairMapping extends MalMapping {
+public class LookupTable extends MalMapping {
     @Id
     @Column(name = "id")
     protected int id;
@@ -21,14 +21,14 @@ public class PairMapping extends MalMapping {
     @Column(name = "name")
     protected String name;
 
-    public PairMapping() {}
+    public LookupTable() {}
 
-    public PairMapping(PairMapping other) {
+    public LookupTable(LookupTable other) {
         this.id = other.id;
         this.name = other.name.trim();
     }
 
-    public PairMapping(int id, String name) {
+    public LookupTable(int id, String name) {
         this.id = id;
         this.name = name.trim();
     }

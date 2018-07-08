@@ -61,6 +61,6 @@ public class PersonConverter extends Converter {
         person.setFavorites(page.parseMemberFavorites());
         person.setOtherInfo(page.parseMore());
 
-        hibernateUtils.updateMalMapping(personId, person);
+        hibernateUtils.saveOrUpdateMalMapping(person);
     }
 }

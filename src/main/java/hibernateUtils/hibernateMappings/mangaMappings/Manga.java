@@ -1,6 +1,8 @@
 package hibernateUtils.hibernateMappings.mangaMappings;
 
 import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
+import hibernateUtils.hibernateMappings.lookupTableMappings.MangaStatusType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.MangaType;
 
 import javax.persistence.*;
 import java.util.Calendar;

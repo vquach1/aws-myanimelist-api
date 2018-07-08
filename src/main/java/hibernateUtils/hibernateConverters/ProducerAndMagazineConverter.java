@@ -25,7 +25,7 @@ public class ProducerAndMagazineConverter extends Converter {
             idToProducerMap.put(id, producer);
         }
 
-        hibernateUtils.updateMalMappings(idToProducerMap);
+        hibernateUtils.saveOrUpdateMalMappings(idToProducerMap.values());
     }
 
     public void convertMagazines() {
@@ -41,7 +41,7 @@ public class ProducerAndMagazineConverter extends Converter {
             idToMagazineMap.put(id, magazine);
         }
 
-        hibernateUtils.updateMalMappings(idToMagazineMap);
+        hibernateUtils.saveOrUpdateMalMappings(idToMagazineMap.values());
     }
 
     public void convert() {

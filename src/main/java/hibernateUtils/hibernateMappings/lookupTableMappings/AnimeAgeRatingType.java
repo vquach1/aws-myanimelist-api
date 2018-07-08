@@ -1,13 +1,14 @@
-package hibernateUtils.hibernateMappings.animeMappings;
+package hibernateUtils.hibernateMappings.lookupTableMappings;
 
-import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
+import hibernateUtils.hibernateMappings.abstractMappings.LookupTable;
+import hibernateUtils.hibernateMappings.animeMappings.Anime;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
 @Table(name = "myanimelist.anime_age_rating_types")
-public class AnimeAgeRatingType extends PairMapping {
+public class AnimeAgeRatingType extends LookupTable {
     @Column(name = "description")
     private String description;
 

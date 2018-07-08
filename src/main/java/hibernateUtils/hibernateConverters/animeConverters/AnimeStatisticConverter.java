@@ -30,6 +30,6 @@ public class AnimeStatisticConverter extends AnimeAndMangaStatisticConverter {
         animeStat.setWatching(page.parseWatching());
         animeStat.setPlanToWatch(page.parsePlanToWatch());
 
-        hibernateUtils.updateMalMapping(animeId, animeStat);
+        hibernateUtils.saveOrUpdateMalMapping(animeStat);
     }
 }

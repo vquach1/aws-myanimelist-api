@@ -36,8 +36,6 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="hibernateUtils" class="utils.HibernateUtils"/>
-
     <bean id="ConverterConfig" class="beanConfigs.ConverterConfig"/>
     <bean id="UtilsConfig" class="beanConfigs.UtilsConfig"/>
 </beans>

@@ -4,15 +4,13 @@ import hibernateUtils.hibernateConverters.animeConverters.AnimeConverter;
 import hibernateUtils.hibernateConverters.characterConverters.CharacterConverter;
 import hibernateUtils.hibernateConverters.mangaConverters.MangaConverter;
 import hibernateUtils.hibernateConverters.mangaConverters.MangaStatisticConverter;
-import hibernateUtils.hibernateMappings.GenreType;
-import hibernateUtils.hibernateMappings.animeMappings.Anime;
-import hibernateUtils.hibernateMappings.mangaMappings.MangaStatistic;
-import utils.S3Utils;
-import hibernateUtils.hibernateConverters.*;
+import hibernateUtils.hibernateMappings.lookupTableMappings.GenreType;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,7 +23,29 @@ public class Application{
         MangaStatisticConverter mangaStatisticConverter = context.getBean(MangaStatisticConverter.class);
         AnimeConverter animeConverter = context.getBean(AnimeConverter.class);
         CharacterConverter characterConverter = context.getBean(CharacterConverter.class);
+        Downloader downloader = context.getBean(Downloader.class);
+        TaskExecutor taskExecutor = context.getBean(TaskExecutor.class);
 
+        HashMap<Integer, String> animeToIdPathMap =
+                (HashMap<Integer, String>)context.getBean("animeIdToPathMap");
+        List<Runnable> runnables = new ArrayList<>();
+
+        for (Integer id : animeToIdPathMap.keySet()) {
+            runnables.add(() -> {
+                try {
+                    animeConverter.convert(id);
+                } catch (Exception e) {
+                    System.out.println("Error while attempting to process " + animeToIdPathMap.get(id));
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        for (Runnable r : runnables) {
+            taskExecutor.execute(r);
+        }
+
+        /*
         HashMap<Integer, String> characterToIdPathMap =
                 (HashMap<Integer, String>)context.getBean("characterIdToPathMap");
         for (Integer id : characterToIdPathMap.keySet()) {
@@ -36,19 +56,16 @@ public class Application{
                 e.printStackTrace();
             }
         }
+        */
 
         /*
-        List<String> keys = new ArrayList<>();
-        //keys.addAll(s3Utils.getKeys("mal-scrape", "manga/stats/"));
-        for (String oldKey : keys) {
-            String rawHtml = s3Utils.readObject("mal-scrape", oldKey);
-            Document doc = Jsoup.parse(rawHtml);
-            Element elem = doc.selectFirst("meta[property='og:url']");
+        HashMap<Integer, String> mangaIdToPathMap =
+                (HashMap<Integer, String>)context.getBean("mangaIdToPathMap");
 
-            if (elem != null) {
-                String newKey = StringUtils.removeStart(elem.attr("content"), "https://myanimelist.net/");
-                System.out.println(newKey);
-                s3Utils.moveObject(s3Utils.BUCKET, oldKey, s3Utils.BUCKET, newKey);
+        for (Integer id : mangaIdToPathMap.keySet()) {
+            String newKey = mangaIdToPathMap.get(id) + "/pics";
+            if (s3Utils.objectMissingOrOutdated(newKey)) {
+                downloader.download(newKey);
             }
         }
         */

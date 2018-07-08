@@ -2,14 +2,17 @@ package hibernateUtils.hibernateConverters.animeConverters;
 
 import com.amazonaws.util.StringUtils;
 import hibernateUtils.hibernateConverters.abstractConverters.Converter;
-import hibernateUtils.hibernateMappings.GenreType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.GenreType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.RelatedType;
 import hibernateUtils.hibernateMappings.animeMappings.*;
+import hibernateUtils.hibernateMappings.lookupTableMappings.*;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import scrapers.animeScrapers.AnimeDetailsPage;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +38,9 @@ public class AnimeConverter extends Converter {
     @Autowired
     private HashMap<Integer, GenreType> genreTypeMap;
 
+    @Autowired
+    private HashMap<String, RelatedType> relatedTypeMap;
+
     public AnimeConverter() {}
 
     /*
@@ -50,7 +56,7 @@ public class AnimeConverter extends Converter {
         fillIdToElemMap(producerMap, Producer.class);
 
         // Done separately, because AnimeAgeRating is a special
-        // subtype of PairMapping with a 3rd parameter (a description)
+        // subtype of LookupTable with a 3rd parameter (a description)
         initializeAnimeAgeRatingTypeMap();
     }
 
@@ -77,17 +83,14 @@ public class AnimeConverter extends Converter {
         }
     }
 
-    public void convert(int animeId) {
-        String path = animeIdToPathMap.get(animeId);
-        Document doc = parseHtml(path);
-        AnimeDetailsPage page = new AnimeDetailsPage(doc);
-
-        if (page.isEmptyPage()) {
-            return;
-        }
-
+    private Anime createAnime(AnimeDetailsPage page, int animeId) {
         Anime anime = new Anime();
         anime.setId(animeId);
+
+        // Set titles
+        anime.setMainTitle(page.parseMainTitle());
+        anime.setEnglishTitle(page.parseEnglishTitle());
+        anime.setJapaneseTitle(page.parseJapaneseTitle());
 
         // Set type, status, age rating, season, and source type ids
         anime.setAnimeType(animeTypeMap.get(page.parseType()));
@@ -151,6 +154,68 @@ public class AnimeConverter extends Converter {
             anime.getProducerToRole().put(producerMap.get(lId), producerTypeMap.get("Licensor"));
         }
 
-        hibernateUtils.updateMalMapping(animeId, anime);
+        return anime;
+    }
+
+    private List<AnimeSynonymTitle> createAnimeSynonymTitles(AnimeDetailsPage page, Anime anime) {
+        String[] synonymTitles = page.parseSynonymTitles();
+        List<AnimeSynonymTitle> titles = new ArrayList<>();
+
+        for (String name : synonymTitles) {
+            titles.add(new AnimeSynonymTitle(anime, name));
+        }
+
+        return titles;
+    }
+
+    private void addRelatedAnimes(Anime anime, List<String> relatedAnimes, RelatedType relatedType) {
+        for (String related : relatedAnimes) {
+            int relatedId = Integer.valueOf(related.split("/")[1]);
+
+            // We must insert the id, path pair into
+            // the map because the MAL's anime index may
+            // not be up to date with what is actually available
+            animeIdToPathMap.put(relatedId, related);
+
+            Anime relatedAnime = (Anime)hibernateUtils.getMalMapping(relatedId, Anime.class);
+            if (relatedAnime == null) {
+                System.out.println("Must convert " + relatedId + " first for " + anime.getId());
+                taskExecutor.execute(() -> convert(relatedId));
+            } else {
+                anime.getRelatedAnimes().put(relatedAnime, relatedType);
+            }
+        }
+    }
+
+    public void convert(int animeId) {
+        String path = animeIdToPathMap.get(animeId);
+        Document doc = parseHtml(path);
+        AnimeDetailsPage page = new AnimeDetailsPage(doc);
+
+        if (page.isEmptyPage()) {
+            return;
+        }
+
+        Anime anime = createAnime(page, animeId);
+        hibernateUtils.saveOrUpdateMalMapping(anime);
+
+        List<AnimeSynonymTitle> titles = createAnimeSynonymTitles(page, anime);
+        for (AnimeSynonymTitle title : titles) {
+            hibernateUtils.saveOrUpdateMalMapping(title);
+        }
+
+        addRelatedAnimes(anime, page.parsePrequels(), relatedTypeMap.get("Prequel"));
+        addRelatedAnimes(anime, page.parseSequels(), relatedTypeMap.get("Sequel"));
+        addRelatedAnimes(anime, page.parseSideStories(), relatedTypeMap.get("Side story"));
+        addRelatedAnimes(anime, page.parseParentStories(), relatedTypeMap.get("Parent story"));
+        addRelatedAnimes(anime, page.parseSpinoffs(), relatedTypeMap.get("Spin-off"));
+        addRelatedAnimes(anime, page.parseSummaries(), relatedTypeMap.get("Summary"));
+        addRelatedAnimes(anime, page.parseAlternativeSettings(), relatedTypeMap.get("Alternative setting"));
+        addRelatedAnimes(anime, page.parseAlternativeVersions(), relatedTypeMap.get("Alternative version"));
+        addRelatedAnimes(anime, page.parseOthers(), relatedTypeMap.get("Other"));
+
+        hibernateUtils.saveOrUpdateMalMapping(anime);
+
+        System.out.println("Converted " + animeId);
     }
 }

@@ -35,6 +35,6 @@ public class MangaStatisticConverter extends AnimeAndMangaStatisticConverter {
         mangaStat.setReading(page.parseReading());
         mangaStat.setPlanToRead(page.parsePlanToRead());
 
-        hibernateUtils.updateMalMapping(mangaId, mangaStat);
+        hibernateUtils.saveOrUpdateMalMapping(mangaStat);
     }
 }

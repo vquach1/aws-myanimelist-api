@@ -1,14 +1,13 @@
 package hibernateUtils.hibernateMappings.mangaMappings;
 
-import hibernateUtils.hibernateMappings.abstractMappings.MalMapping;
-import hibernateUtils.hibernateMappings.abstractMappings.PairMapping;
+import hibernateUtils.hibernateMappings.abstractMappings.LookupTable;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
 @Table(name = "myanimelist.magazines")
-public class Magazine extends PairMapping {
+public class Magazine extends LookupTable {
     @OneToMany(mappedBy = "magazine")
     private Set<Manga> mangas;
 

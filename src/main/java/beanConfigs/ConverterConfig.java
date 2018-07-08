@@ -7,7 +7,8 @@ import hibernateUtils.hibernateConverters.characterConverters.CharacterConverter
 import hibernateUtils.hibernateConverters.mangaConverters.MangaConverter;
 import hibernateUtils.hibernateConverters.mangaConverters.MangaStatisticConverter;
 import hibernateUtils.hibernateConverters.personConverters.PersonConverter;
-import hibernateUtils.hibernateMappings.GenreType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.GenreType;
+import hibernateUtils.hibernateMappings.lookupTableMappings.RelatedType;
 import utils.Downloader;
 import utils.HibernateUtils;
 import utils.S3Utils;
@@ -77,11 +78,19 @@ public class ConverterConfig {
     public HashMap<Integer, GenreType> genreTypeMap() {
         List<GenreType> genreTypes = (List<GenreType>)hibernateUtils.getTableRows(GenreType.class);
         HashMap<Integer, GenreType> map = new HashMap<>();
-
         for (GenreType type : genreTypes) {
             map.put(type.getId(), type);
         }
+        return map;
+    }
 
+    @Bean
+    public HashMap<String, RelatedType> relatedTypeMap() {
+        List<RelatedType> genreTypes = (List<RelatedType>)hibernateUtils.getTableRows(RelatedType.class);
+        HashMap<String, RelatedType> map = new HashMap<>();
+        for (RelatedType type : genreTypes) {
+            map.put(type.getName(), type);
+        }
         return map;
     }
 
