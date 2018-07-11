@@ -1,6 +1,6 @@
 package beanConfigs;
 
-import org.springframework.core.task.SyncTaskExecutor;
+import hibernateUtils.daos.GenericDao;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import utils.*;
@@ -16,7 +16,7 @@ public class UtilsConfig {
 
     @Bean
     public S3Utils s3Utils() {
-        return new S3Utils();
+        return new S3Utils("mal-scrape", 200);
     }
 
     @Bean
@@ -25,8 +25,8 @@ public class UtilsConfig {
     }
 
     @Bean
-    public HibernateUtils hibernateUtils() {
-        return new HibernateUtils();
+    public GenericDao hibernateUtils() {
+        return new GenericDao();
     }
 
     @Bean
@@ -35,10 +35,5 @@ public class UtilsConfig {
         executor.setCorePoolSize(1);
         executor.setMaxPoolSize(1);
         return executor;
-    }
-
-    @Bean
-    public Graph<Runnable> dependencyGraph() {
-        return new Graph<>();
     }
 }

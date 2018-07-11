@@ -1,16 +1,17 @@
 package beanConfigs;
 
-import hibernateUtils.hibernateConverters.*;
-import hibernateUtils.hibernateConverters.animeConverters.AnimeConverter;
-import hibernateUtils.hibernateConverters.animeConverters.AnimeStatisticConverter;
-import hibernateUtils.hibernateConverters.characterConverters.CharacterConverter;
-import hibernateUtils.hibernateConverters.mangaConverters.MangaConverter;
-import hibernateUtils.hibernateConverters.mangaConverters.MangaStatisticConverter;
-import hibernateUtils.hibernateConverters.personConverters.PersonConverter;
-import hibernateUtils.hibernateMappings.lookupTableMappings.GenreType;
-import hibernateUtils.hibernateMappings.lookupTableMappings.RelatedType;
+import scrapers.*;
+import scrapers.animes.AnimeCharacterStaffScraper;
+import scrapers.animes.AnimeScraper;
+import scrapers.animes.AnimeStatisticScraper;
+import scrapers.characters.CharacterScraper;
+import scrapers.mangas.MangaScraper;
+import scrapers.mangas.MangaStatisticScraper;
+import scrapers.persons.PersonScraper;
+import hibernateUtils.mappings.lookupTables.GenreType;
+import hibernateUtils.mappings.lookupTables.RelatedType;
 import utils.Downloader;
-import utils.HibernateUtils;
+import hibernateUtils.daos.GenericDao;
 import utils.S3Utils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
@@ -30,7 +31,7 @@ public class ConverterConfig {
     private S3Utils s3Utils;
 
     @Autowired
-    private HibernateUtils hibernateUtils;
+    private GenericDao genericDao;
 
     @Autowired
     private Downloader downloader;
@@ -38,45 +39,50 @@ public class ConverterConfig {
     //region Converters
 
     @Bean
-    public AnimeConverter animeConverter() {
-        return new AnimeConverter();
+    public AnimeScraper animeConverter() {
+        return new AnimeScraper();
     }
 
     @Bean
-    public AnimeStatisticConverter animeStatisticConverter() {
-        return new AnimeStatisticConverter();
+    public AnimeStatisticScraper animeStatisticConverter() {
+        return new AnimeStatisticScraper();
     }
 
     @Bean
-    public MangaConverter mangaConverter() {
-        return new MangaConverter();
+    public AnimeCharacterStaffScraper animeCharacterStaffConverter() {
+        return new AnimeCharacterStaffScraper();
     }
 
     @Bean
-    public MangaStatisticConverter mangaStatisticConverter() {
-        return new MangaStatisticConverter();
+    public MangaScraper mangaConverter() {
+        return new MangaScraper();
     }
 
     @Bean
-    public CharacterConverter characterConverter() {
-        return new CharacterConverter();
+    public MangaStatisticScraper mangaStatisticConverter() {
+        return new MangaStatisticScraper();
     }
 
     @Bean
-    public PersonConverter personCoverter() {
-        return new PersonConverter();
+    public CharacterScraper characterConverter() {
+        return new CharacterScraper();
     }
 
     @Bean
-    public ProducerAndMagazineConverter producerConverter() {
-        return new ProducerAndMagazineConverter();
+    public PersonScraper personCoverter() {
+        return new PersonScraper();
+    }
+
+    @Bean
+    public ProducerAndMagazineScraper producerConverter() {
+        return new ProducerAndMagazineScraper();
     }
 
     //endregion
 
     @Bean
     public HashMap<Integer, GenreType> genreTypeMap() {
-        List<GenreType> genreTypes = (List<GenreType>)hibernateUtils.getTableRows(GenreType.class);
+        List<GenreType> genreTypes = (List<GenreType>) genericDao.getTableRows(GenreType.class);
         HashMap<Integer, GenreType> map = new HashMap<>();
         for (GenreType type : genreTypes) {
             map.put(type.getId(), type);
@@ -86,7 +92,7 @@ public class ConverterConfig {
 
     @Bean
     public HashMap<String, RelatedType> relatedTypeMap() {
-        List<RelatedType> genreTypes = (List<RelatedType>)hibernateUtils.getTableRows(RelatedType.class);
+        List<RelatedType> genreTypes = (List<RelatedType>) genericDao.getTableRows(RelatedType.class);
         HashMap<String, RelatedType> map = new HashMap<>();
         for (RelatedType type : genreTypes) {
             map.put(type.getName(), type);

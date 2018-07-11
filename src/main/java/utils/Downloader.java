@@ -11,12 +11,29 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
+/*
+ * A thread-safe object that performs HTTP Get requests on
+ * specified URLs. When creating the object, the user passes
+ * minimum number of milliseconds that must elapse between
+ * each download
+ */
 public class Downloader {
     @Autowired
     private S3Utils s3Utils;
 
+    /*
+     * Stores the time at which the last HTTP Get request occurred
+     */
     private Date lastDownloadTime;
+
+    /*
+     * The minimum number of milliseconds that must elapse between requests
+     */
     private long timeWaitMillis;
+
+    /*
+     * The domain of the site that will be queried
+     */
     private String domain;
 
     public Downloader(long timeWaitMillis, String domain) {
@@ -28,6 +45,8 @@ public class Downloader {
         lastDownloadTime = new Date(new Date().getTime() - timeWaitMillis);
     }
 
+    // TODO: Implement exponential backoff for download()
+
     /*
      * Downloads a page from the specified path for the domain,
      * and inserts it into S3. If fewer than lastDownloadTime
@@ -36,7 +55,7 @@ public class Downloader {
      * server with requests
      */
     public synchronized void download(String path) {
-        System.out.println("Received request to download " + path);
+        System.out.println("    Received request to download " + path);
 
         Date currTime = new Date();
         long timeWait = timeWaitMillis - (currTime.getTime() - lastDownloadTime.getTime());
@@ -73,6 +92,6 @@ public class Downloader {
         } catch (IOException e) {}
 
         s3Utils.putObject(path, content.toString());
-        System.out.println("Finished downloading " + path);
+        System.out.println("    Finished downloading " + path);
     }
 }
