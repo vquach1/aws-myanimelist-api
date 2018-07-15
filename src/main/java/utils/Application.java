@@ -21,24 +21,36 @@ public class Application{
         ApplicationContext context = new ClassPathXmlApplicationContext("context.xml");
         S3Utils s3Utils = context.getBean(S3Utils.class);
         HashMap<Integer, GenreType> genreMap = (HashMap<Integer, GenreType>)context.getBean("genreTypeMap");
-        MangaScraper mangaConverter = context.getBean(MangaScraper.class);
-        MangaStatisticScraper mangaStatisticConverter = context.getBean(MangaStatisticScraper.class);
-        AnimeScraper animeConverter = context.getBean(AnimeScraper.class);
-        AnimeCharacterStaffScraper animeCharacterStaffConverter = context.getBean(AnimeCharacterStaffScraper.class);
-        CharacterScraper characterConverter = context.getBean(CharacterScraper.class);
+        MangaScraper mangaScraper = context.getBean(MangaScraper.class);
+        MangaStatisticScraper mangaStatisticScraper = context.getBean(MangaStatisticScraper.class);
+        AnimeScraper animeScraper = context.getBean(AnimeScraper.class);
+        AnimeCharacterStaffScraper animeCharacterStaffScraper = context.getBean(AnimeCharacterStaffScraper.class);
+        CharacterScraper characterScraper = context.getBean(CharacterScraper.class);
         Downloader downloader = context.getBean(Downloader.class);
         TaskExecutor taskExecutor = context.getBean(TaskExecutor.class);
 
         HashMap<Integer, String> animeToIdPathMap =
                 (HashMap<Integer, String>)context.getBean("animeIdToPathMap");
+        HashMap<Integer, String> mangaToIdPathMap =
+                (HashMap<Integer, String>)context.getBean("mangaIdToPathMap");
+
         List<Runnable> runnables = new ArrayList<>();
 
-        for (Integer id : animeToIdPathMap.keySet()) {
+        int count = 0;
+        int beginCount = 0;
+        for (Integer id : mangaToIdPathMap.keySet()) {
+            count++;
+            if (count < beginCount) {
+                continue;
+            }
+
+            Integer countInt = new Integer(count);
             runnables.add(() -> {
                 try {
-                    animeCharacterStaffConverter.convert(id);
+                    System.out.print(countInt + " ");
+                    mangaScraper.convert(id);
                 } catch (Exception e) {
-                    System.out.println("Error while attempting to process " + animeToIdPathMap.get(id));
+                    System.out.println("Error while attempting to process " + mangaToIdPathMap.get(id));
                     e.printStackTrace();
                 }
             });

@@ -1,11 +1,15 @@
 package hibernateUtils.mappings.mangas;
 
 import hibernateUtils.mappings.abstracts.MalMapping;
+import hibernateUtils.mappings.animes.Anime;
+import hibernateUtils.mappings.joinTables.MangaAuthor;
+import hibernateUtils.mappings.lookupTables.GenreType;
 import hibernateUtils.mappings.lookupTables.MangaStatusType;
 import hibernateUtils.mappings.lookupTables.MangaType;
+import hibernateUtils.mappings.lookupTables.RelatedType;
 
 import javax.persistence.*;
-import java.util.Calendar;
+import java.util.*;
 
 @Entity
 @Table(name = "myanimelist.manga")
@@ -15,6 +19,15 @@ public class Manga extends MalMapping {
     @Id
     @Column(name = "id")
     private int id;
+
+    @Column(name = "main_title")
+    private String mainTitle;
+
+    @Column(name = "english_title")
+    private String englishTitle;
+
+    @Column(name = "japanese_title")
+    private String japaneseTitle;
 
     @Column(name = "synopsis")
     private String synopsis;
@@ -38,6 +51,25 @@ public class Manga extends MalMapping {
 
     //region JoinColumns and JoinTables
 
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+            name = "myanimelist.manga_genres",
+            joinColumns = { @JoinColumn(name = "manga_id") },
+            inverseJoinColumns = { @JoinColumn(name = "genre_type_id") })
+    private Set<GenreType> genreTypes = new HashSet<>();
+
+    @ManyToMany(mappedBy = "mangaAdaptations")
+    private Set<Anime> animeAdaptations = new HashSet<>();
+
+
+    @JoinTable(name = "myanimelist.manga_related",
+            joinColumns = { @JoinColumn(name = "manga_id1") },
+            inverseJoinColumns = { @JoinColumn(name = "related_type_id") })
+    @MapKeyJoinColumn(name = "manga_id2")
+    @ElementCollection
+    private Map<Manga, RelatedType> relatedMangas = new HashMap<>();
+
+
     @ManyToOne
     @JoinColumn(name = "manga_type_id")
     private MangaType mangaType;
@@ -50,6 +82,12 @@ public class Manga extends MalMapping {
     @JoinColumn(name = "magazine_id")
     private Magazine magazine;
 
+    @OneToMany(mappedBy = "manga")
+    private Set<MangaSynonymTitle> mangaSynonymTitles;
+
+    @OneToMany(mappedBy = "pk.manga", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<MangaAuthor> mangaAuthors;
+
     //endregion
 
     public int getId() {
@@ -58,6 +96,30 @@ public class Manga extends MalMapping {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getMainTitle() {
+        return mainTitle;
+    }
+
+    public void setMainTitle(String mainTitle) {
+        this.mainTitle = mainTitle;
+    }
+
+    public String getEnglishTitle() {
+        return englishTitle;
+    }
+
+    public void setEnglishTitle(String englishTitle) {
+        this.englishTitle = englishTitle;
+    }
+
+    public String getJapaneseTitle() {
+        return japaneseTitle;
+    }
+
+    public void setJapaneseTitle(String japaneseTitle) {
+        this.japaneseTitle = japaneseTitle;
     }
 
     public String getSynopsis() {
@@ -130,5 +192,45 @@ public class Manga extends MalMapping {
 
     public void setMagazine(Magazine magazine) {
         this.magazine = magazine;
+    }
+
+    public Set<Anime> getAnimeAdaptations() {
+        return animeAdaptations;
+    }
+
+    public void setAnimeAdaptations(Set<Anime> animeAdaptations) {
+        this.animeAdaptations = animeAdaptations;
+    }
+
+    public Map<Manga, RelatedType> getRelatedMangas() {
+        return relatedMangas;
+    }
+
+    public void setRelatedMangas(Map<Manga, RelatedType> relatedMangas) {
+        this.relatedMangas = relatedMangas;
+    }
+
+    public Set<GenreType> getGenreTypes() {
+        return genreTypes;
+    }
+
+    public void setGenreTypes(Set<GenreType> genreTypes) {
+        this.genreTypes = genreTypes;
+    }
+
+    public Set<MangaSynonymTitle> getMangaSynonymTitles() {
+        return mangaSynonymTitles;
+    }
+
+    public void setMangaSynonymTitles(Set<MangaSynonymTitle> mangaSynonymTitles) {
+        this.mangaSynonymTitles = mangaSynonymTitles;
+    }
+
+    public Set<MangaAuthor> getMangaAuthors() {
+        return mangaAuthors;
+    }
+
+    public void setMangaAuthors(Set<MangaAuthor> mangaAuthors) {
+        this.mangaAuthors = mangaAuthors;
     }
 }

@@ -1,8 +1,14 @@
 package pageTypes.mangas;
 
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import pageTypes.abstracts.AnimeAndMangaDetailsPage;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /*
  * Provides HTML scraping utilities for pages of the path '/manga/{mangaId}/{mangaName}'
@@ -13,9 +19,14 @@ public class MangaDetailsPage extends AnimeAndMangaDetailsPage {
     private static final String chaptersSelector = "span[class='dark_text']:contains(Chapters:)";
     private static final String publishedSelector = "span[class='dark_text']:contains(Published:)";
     private static final String serializationSelector = "span[class='dark_text']:contains(Serialization:)";
+    private static final String authorSelector = "span[class='dark_text']:contains(Authors:)";
 
     public MangaDetailsPage(Document doc) {
         super(doc);
+    }
+
+    public String parseMainTitle() {
+        return super.parseMainTitle().split(" | ")[0];
     }
 
     /*
@@ -57,5 +68,33 @@ public class MangaDetailsPage extends AnimeAndMangaDetailsPage {
         } else {
             return serialization.child(1).ownText();
         }
+    }
+
+    public Map<String, String> parseAuthors() {
+        Map<String, String> authorRoles = new HashMap<>();
+        Element authors = parent(authorSelector);
+        String[] roles = authors.ownText().split(",");
+
+        /*
+        System.out.println("Authors");
+        for (int i = 1; i < authors.children().size(); i++) {
+            System.out.println(authors.child(i));
+        }
+
+        System.out.println("Roles");
+        for (String role : roles) {
+            System.out.println(role);
+        }
+        */
+
+        for (int i = 1; i < authors.children().size(); i++) {
+            String personPath = authors.child(i).attr("href").substring(1);
+            String role = roles[i-1].trim();
+            role = role.substring(1, role.length()-1);
+
+            authorRoles.put(personPath, role);
+        }
+
+        return authorRoles;
     }
 }

@@ -33,7 +33,7 @@ public class VoiceActorRole extends MalMapping {
         return pk.getLanguageType();
     }
 
-    private class VoiceActorRolePk implements Serializable {
+    private static class VoiceActorRolePk implements Serializable {
         @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "person_id")
         private Person person;
@@ -45,6 +45,8 @@ public class VoiceActorRole extends MalMapping {
         @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "language_type_id")
         private LanguageType languageType;
+
+        public VoiceActorRolePk() {}
 
         public VoiceActorRolePk(Person person, MalCharacter malCharacter, LanguageType languageType) {
             this.person = person;

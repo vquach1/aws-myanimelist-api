@@ -1,6 +1,8 @@
 package scrapers.animes;
 
 import com.amazonaws.util.StringUtils;
+import hibernateUtils.daos.MangaDao;
+import hibernateUtils.mappings.mangas.Manga;
 import scrapers.abstracts.Scraper;
 import hibernateUtils.daos.AnimeDao;
 import hibernateUtils.mappings.lookupTables.GenreType;
@@ -11,12 +13,10 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import pageTypes.animes.AnimeDetailsPage;
+import scrapers.mangas.MangaScraper;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class AnimeScraper extends Scraper {
     private HashMap<String, AnimeType> animeTypeMap = new HashMap<>();
@@ -37,13 +37,19 @@ public class AnimeScraper extends Scraper {
     private HashMap<Integer, String> mangaIdToPathMap;
 
     @Autowired
-    private HashMap<Integer, GenreType> genreTypeMap;
+    private Map<String, GenreType> genreTypeMap;
 
     @Autowired
     private HashMap<String, RelatedType> relatedTypeMap;
 
     @Autowired
     private AnimeDao animeDao;
+
+    @Autowired
+    private MangaDao mangaDao;
+
+    @Autowired
+    private MangaScraper mangaScraper;
 
     public AnimeScraper() {}
 
@@ -137,9 +143,9 @@ public class AnimeScraper extends Scraper {
         anime.setBackground(backgroundStr);
 
         // Set genres
-        List<Integer> genreIds = page.parseGenres();
-        for (int gId : genreIds) {
-            anime.getGenreTypes().add(genreTypeMap.get(gId));
+        List<String> genres = page.parseGenres();
+        for (String genre : genres) {
+            anime.getGenreTypes().add(genreTypeMap.get(genre));
         }
 
         // Set producer ids
@@ -190,6 +196,21 @@ public class AnimeScraper extends Scraper {
         }
     }
 
+    private void addMangaAdaptations(Anime anime, List<String> relatedMangas) {
+        for (String relatedPath : relatedMangas) {
+            int relatedId = Integer.valueOf(relatedPath.split("/")[1]);
+
+            mangaIdToPathMap.put(relatedId, relatedPath);
+
+            Manga relatedManga = mangaDao.getManga(relatedId);
+            if (relatedPath == null) {
+                relatedManga = mangaScraper.convert(relatedId);
+            }
+
+            anime.getMangaAdaptations().add(relatedManga);
+        }
+    }
+
     public Anime convert(int animeId) {
         String path = animeIdToPathMap.get(animeId);
         Document doc = parseHtml(path);
@@ -207,6 +228,7 @@ public class AnimeScraper extends Scraper {
             genericDao.saveOrUpdateMalMapping(title);
         }
 
+        addMangaAdaptations(anime, page.parseAdaptations());
         addRelatedAnimes(anime, page.parsePrequels(), relatedTypeMap.get("Prequel"));
         addRelatedAnimes(anime, page.parseSequels(), relatedTypeMap.get("Sequel"));
         addRelatedAnimes(anime, page.parseSideStories(), relatedTypeMap.get("Side story"));
@@ -218,6 +240,7 @@ public class AnimeScraper extends Scraper {
         addRelatedAnimes(anime, page.parseOthers(), relatedTypeMap.get("Other"));
 
         genericDao.saveOrUpdateMalMapping(anime);
+        System.out.println("Converted anime with path " +  path);
         return anime;
     }
 }

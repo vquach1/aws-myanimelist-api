@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Scraper {
     @Autowired
@@ -42,7 +43,7 @@ public abstract class Scraper {
      * pairs based on the values retrieved from the specified
      * LookupTable class.
      */
-    protected <T extends LookupTable> void fillNameToElemMap(HashMap<String, T> map, Class classIn) {
+    protected <T extends LookupTable> void fillNameToElemMap(Map<String, T> map, Class classIn) {
         if (!LookupTable.class.isAssignableFrom(classIn)) {
             throw new IllegalArgumentException("The provided class must be a subtype of LookupTable");
         }

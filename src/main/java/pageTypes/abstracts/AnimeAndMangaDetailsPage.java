@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /*
  * Provides HTML scraping utilities for pages of the path 'media/{mediaId}/{mediaTitle}'
@@ -25,6 +26,17 @@ public class AnimeAndMangaDetailsPage extends MalPage {
     private static final String genreSelector = "span[class='dark_text']:contains(Genres:)";
     private static final String synopsisSelector = "span[itemprop='description']";
     private static final String backgroundSelector = "h2[style='margin-top: 15px;']:contains(Background)";
+
+    private static final String spinoffSelector = "td[class='ar fw-n borderClass']:contains(Spin-off:)";
+    private static final String adaptationSelector = "td[class='ar fw-n borderClass']:contains(Adaptation:)";
+    private static final String prequelSelector = "td[class='ar fw-n borderClass']:contains(Prequel:)";
+    private static final String sequelSelector = "td[class='ar fw-n borderClass']:contains(Sequel:)";
+    private static final String otherSelector = "td[class='ar fw-n borderClass']:contains(Other:)";
+    private static final String sideStorySelector = "td[class='ar fw-n borderClass']:contains(Side story:)";
+    private static final String altSettingSelector = "td[class='ar fw-n borderClass']:contains(Alternative setting:)";
+    private static final String altVersionSelector = "td[class='ar fw-n borderClass']:contains(Alternative version:)";
+    private static final String summarySelector = "td[class='ar fw-n borderClass']:contains(Summary:)";
+    private static final String parentStorySelector = "td[class='ar fw-n borderClass']:contains(Parent story:)";
 
     public AnimeAndMangaDetailsPage(Document doc) {
         super(doc);
@@ -85,11 +97,26 @@ public class AnimeAndMangaDetailsPage extends MalPage {
     }
 
     /*
-     * Returns a list of genre ids from the 'Genres' row
+     * Returns a list of genres from the 'Genres' row
      * in the 'Information' section
      */
-    public List<Integer> parseGenres() {
-        return parseIds(genreSelector, genreIdPattern);
+    public List<String> parseGenres() {
+        Element elem = parent(genreSelector);
+        List<String> genres = new ArrayList<>();
+
+        if (elem == null || elem.text().contains("None found,")) {
+            return genres;
+        }
+
+        for (Element href : elem.children()) {
+            if (!href.tagName().equals("a")) {
+                continue;
+            }
+
+            genres.add(href.ownText());
+        }
+
+        return genres;
     }
 
     /*
@@ -157,5 +184,100 @@ public class AnimeAndMangaDetailsPage extends MalPage {
         }
 
         return ids;
+    }
+
+    /*
+     * Returns a list of paths from the 'Adaptation' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parseAdaptations() {
+        return parseRelated(adaptationSelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Prequel' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parsePrequels() {
+        return parseRelated(prequelSelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Sequel' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parseSequels() {
+        return parseRelated(sequelSelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Spin-off' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parseSpinoffs() {
+        return parseRelated(spinoffSelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Side story' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parseSideStories() {
+        return parseRelated(sideStorySelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Alternative setting' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parseAlternativeSettings() {
+        return parseRelated(altSettingSelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Alternative version' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parseAlternativeVersions() {
+        return parseRelated(altVersionSelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Summary' row
+     * in the 'Related Anime' section
+     */
+    public List<String> parseSummaries() {
+        return parseRelated(summarySelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Parent story' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parseParentStories() {
+        return parseRelated(parentStorySelector);
+    }
+
+    /*
+     * Returns a list of paths from the 'Other' row
+     * in the 'Related Anime/Manga' section
+     */
+    public List<String> parseOthers() {
+        return parseRelated(otherSelector);
+    }
+
+    /*
+     * Returns a list of paths from the selected
+     * row in the 'Related Anime/Manga' section
+     */
+    private List<String> parseRelated(String relatedSelector) {
+        Element related = nextElementSibling(relatedSelector);
+        if (related == null) {
+            return new ArrayList<>();
+        }
+
+        return related.children().stream()
+                .map(elem -> elem.attr("href").substring(1)) // Trim the beginning slash
+                .collect(Collectors.toList());
     }
 }

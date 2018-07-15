@@ -15,6 +15,8 @@ public class AnimeCharacter extends MalMapping {
     @EmbeddedId
     private AnimeCharacterPk pk;
 
+    public AnimeCharacter() {}
+
     public AnimeCharacter(Anime anime, MalCharacter malCharacter, MalCharacterRoleType malCharacterRoleType) {
         pk = new AnimeCharacterPk(anime, malCharacter, malCharacterRoleType);
     }
@@ -34,7 +36,7 @@ public class AnimeCharacter extends MalMapping {
         return pk.getMalCharacterRoleType();
     }
 
-    private class AnimeCharacterPk implements Serializable {
+    private static class AnimeCharacterPk implements Serializable {
         @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "anime_id")
         private Anime anime;
@@ -46,6 +48,8 @@ public class AnimeCharacter extends MalMapping {
         @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "character_role_type_id")
         private MalCharacterRoleType malCharacterRoleType;
+
+        public AnimeCharacterPk() {}
 
         public AnimeCharacterPk(Anime anime, MalCharacter malCharacter, MalCharacterRoleType malCharacterRoleType) {
             this.anime = anime;

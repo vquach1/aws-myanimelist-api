@@ -33,7 +33,7 @@ public class AnimeStaffRole extends MalMapping {
         return pk.getAnimeStaffRoleType();
     }
 
-    private class AnimeStaffRolePk implements Serializable {
+    private static class AnimeStaffRolePk implements Serializable {
         @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "anime_id")
         private Anime anime;
@@ -46,7 +46,9 @@ public class AnimeStaffRole extends MalMapping {
         @JoinColumn(name = "anime_staff_role_type_id")
         private AnimeStaffRoleType animeStaffRoleType;
 
-        private AnimeStaffRolePk(Anime anime, Person person, AnimeStaffRoleType animeStaffRoleType) {
+        public AnimeStaffRolePk() {}
+
+        public AnimeStaffRolePk(Anime anime, Person person, AnimeStaffRoleType animeStaffRoleType) {
             this.anime = anime;
             this.person = person;
             this.animeStaffRoleType = animeStaffRoleType;

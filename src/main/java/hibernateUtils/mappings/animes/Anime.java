@@ -5,6 +5,7 @@ import hibernateUtils.mappings.lookupTables.GenreType;
 import hibernateUtils.mappings.lookupTables.RelatedType;
 import hibernateUtils.mappings.abstracts.MalMapping;
 import hibernateUtils.mappings.lookupTables.*;
+import hibernateUtils.mappings.mangas.Manga;
 import hibernateUtils.mappings.persons.Person;
 
 import javax.persistence.*;
@@ -61,6 +62,14 @@ public class Anime extends MalMapping {
     private Set<GenreType> genreTypes = new HashSet<>();
 
 
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+        name = "myanimelist.adaptations",
+        joinColumns = { @JoinColumn(name = "anime_id") },
+        inverseJoinColumns = { @JoinColumn(name = "manga_id") })
+    private Set<Manga> mangaAdaptations = new HashSet<>();
+
+
     @JoinTable(name = "myanimelist.anime_producers",
         joinColumns = { @JoinColumn(name = "anime_id") },
         inverseJoinColumns = { @JoinColumn(name = "producer_type_id") })
@@ -75,6 +84,7 @@ public class Anime extends MalMapping {
     @MapKeyJoinColumn(name = "anime_id2")
     @ElementCollection
     private Map<Anime, RelatedType> relatedAnimes = new HashMap<>();
+
 
     @JoinTable(name = "myanimelist.anime_staff_roles",
         joinColumns = { @JoinColumn(name = "anime_id") },
@@ -293,6 +303,14 @@ public class Anime extends MalMapping {
 
     public void setAnimeCharacters(Set<AnimeCharacter> animeCharacters) {
         this.animeCharacters = animeCharacters;
+    }
+
+    public Set<Manga> getMangaAdaptations() {
+        return mangaAdaptations;
+    }
+
+    public void setMangaAdaptations(Set<Manga> mangaAdaptations) {
+        this.mangaAdaptations = mangaAdaptations;
     }
 
     //endregion

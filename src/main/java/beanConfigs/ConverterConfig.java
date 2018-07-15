@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class ConverterConfig {
@@ -81,11 +82,11 @@ public class ConverterConfig {
     //endregion
 
     @Bean
-    public HashMap<Integer, GenreType> genreTypeMap() {
+    public Map<String, GenreType> genreTypeMap() {
         List<GenreType> genreTypes = (List<GenreType>) genericDao.getTableRows(GenreType.class);
-        HashMap<Integer, GenreType> map = new HashMap<>();
+        Map<String, GenreType> map = new HashMap<>();
         for (GenreType type : genreTypes) {
-            map.put(type.getId(), type);
+            map.put(type.getName(), type);
         }
         return map;
     }

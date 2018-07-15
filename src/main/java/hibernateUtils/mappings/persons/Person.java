@@ -1,6 +1,7 @@
 package hibernateUtils.mappings.persons;
 
 import hibernateUtils.mappings.abstracts.MalMapping;
+import hibernateUtils.mappings.joinTables.MangaAuthor;
 import hibernateUtils.mappings.joinTables.VoiceActorRole;
 
 import javax.persistence.*;
@@ -39,6 +40,9 @@ public class Person extends MalMapping {
 
     @OneToMany(mappedBy = "pk.person", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<VoiceActorRole> voiceActorRoles;
+
+    @OneToMany(mappedBy = "pk.person", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<MangaAuthor> mangaAuthors;
 
     public Person() {}
 
@@ -120,5 +124,13 @@ public class Person extends MalMapping {
 
     public void setVoiceActorRoles(Set<VoiceActorRole> voiceActorRoles) {
         this.voiceActorRoles = voiceActorRoles;
+    }
+
+    public Set<MangaAuthor> getMangaAuthors() {
+        return mangaAuthors;
+    }
+
+    public void setMangaAuthors(Set<MangaAuthor> mangaAuthors) {
+        this.mangaAuthors = mangaAuthors;
     }
 }

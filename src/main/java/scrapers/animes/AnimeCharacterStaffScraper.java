@@ -46,10 +46,10 @@ public class AnimeCharacterStaffScraper extends Scraper {
     private HashMap<Integer, String> peopleIdToPathMap;
 
     @Autowired
-    private CharacterScraper characterConverter;
+    private CharacterScraper characterScraper;
 
     @Autowired
-    private PersonScraper personConverter;
+    private PersonScraper personScraper;
 
     @Autowired
     private AnimeDao animeDao;
@@ -95,7 +95,7 @@ public class AnimeCharacterStaffScraper extends Scraper {
 
             MalCharacter malChar = malCharacterDao.getMalCharacter(charId);
             if (malChar == null) {
-                malChar = characterConverter.convert(charId);
+                malChar = characterScraper.convert(charId);
             }
 
             MalCharacterRoleType charRoleType = characterRoleTypeMap.get(info.getCharacterRole());
@@ -108,7 +108,7 @@ public class AnimeCharacterStaffScraper extends Scraper {
 
                 Person person = personDao.getPerson(personId);
                 if (person == null) {
-                    person = personConverter.convert(personId);
+                    person = personScraper.convert(personId);
                 }
 
                 LanguageType langType = languageTypeMap.get(vaToLang.get(personPath));
@@ -130,7 +130,7 @@ public class AnimeCharacterStaffScraper extends Scraper {
 
             Person person = personDao.getPerson(personId);
             if (person == null) {
-                person = personConverter.convert(personId);
+                person = personScraper.convert(personId);
             }
 
             for (String role : info.getRoles()) {
