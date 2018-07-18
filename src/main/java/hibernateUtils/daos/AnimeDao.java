@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Transactional
 @Component
@@ -32,10 +33,7 @@ public class AnimeDao extends GenericDao {
     public void addMangaAdaptation(Anime anime, Manga manga) {
         Session session = factory.getCurrentSession();
         session.update(anime);
-
-        //System.out.println(anime.getMainTitle() + "    " + manga.getMainTitle());
-
-        //anime.getMangaAdaptations().add(manga);
-        saveOrUpdateMalMapping(anime);
+        anime.getMangaAdaptations().add(manga);
+        session.saveOrUpdate(anime);
     }
 }

@@ -18,6 +18,7 @@ public class AnimeStatisticScraper extends AnimeAndMangaStatisticScraper {
 
     public AnimeStatistic convert(int animeId) {
         String path = animeIdToPathMap.get(animeId) + "/stats";
+        System.out.println("Converting stat " + path);
         Document doc = parseHtml(path);
         AnimeStatisticPage page = new AnimeStatisticPage(doc);
         AnimeStatistic animeStat = new AnimeStatistic();

@@ -36,4 +36,9 @@ public class UtilsConfig {
         executor.setMaxPoolSize(1);
         return executor;
     }
+
+    @Bean
+    public TaskListener taskListener() {
+        return new TaskListener();
+    }
 }

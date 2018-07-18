@@ -3,6 +3,7 @@ package hibernateUtils.mappings.mangas;
 import hibernateUtils.mappings.abstracts.MalMapping;
 import hibernateUtils.mappings.animes.Anime;
 import hibernateUtils.mappings.joinTables.MangaAuthor;
+import hibernateUtils.mappings.joinTables.MangaRelated;
 import hibernateUtils.mappings.lookupTables.GenreType;
 import hibernateUtils.mappings.lookupTables.MangaStatusType;
 import hibernateUtils.mappings.lookupTables.MangaType;
@@ -62,14 +63,6 @@ public class Manga extends MalMapping {
     private Set<Anime> animeAdaptations = new HashSet<>();
 
 
-    @JoinTable(name = "myanimelist.manga_related",
-            joinColumns = { @JoinColumn(name = "manga_id1") },
-            inverseJoinColumns = { @JoinColumn(name = "related_type_id") })
-    @MapKeyJoinColumn(name = "manga_id2")
-    @ElementCollection
-    private Map<Manga, RelatedType> relatedMangas = new HashMap<>();
-
-
     @ManyToOne
     @JoinColumn(name = "manga_type_id")
     private MangaType mangaType;
@@ -87,6 +80,9 @@ public class Manga extends MalMapping {
 
     @OneToMany(mappedBy = "pk.manga", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<MangaAuthor> mangaAuthors;
+
+    @OneToMany(mappedBy = "pk.mangaOne", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<MangaRelated> mangaRelated;
 
     //endregion
 
@@ -202,12 +198,12 @@ public class Manga extends MalMapping {
         this.animeAdaptations = animeAdaptations;
     }
 
-    public Map<Manga, RelatedType> getRelatedMangas() {
-        return relatedMangas;
+    public Set<MangaRelated> getMangaRelated() {
+        return mangaRelated;
     }
 
-    public void setRelatedMangas(Map<Manga, RelatedType> relatedMangas) {
-        this.relatedMangas = relatedMangas;
+    public void setMangaRelated(Set<MangaRelated> mangaRelated) {
+        this.mangaRelated = mangaRelated;
     }
 
     public Set<GenreType> getGenreTypes() {
@@ -232,5 +228,20 @@ public class Manga extends MalMapping {
 
     public void setMangaAuthors(Set<MangaAuthor> mangaAuthors) {
         this.mangaAuthors = mangaAuthors;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!obj.getClass().equals(this.getClass())) {
+            return false;
+        }
+
+        Manga other = (Manga)obj;
+        return id == other.id;
     }
 }

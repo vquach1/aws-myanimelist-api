@@ -21,6 +21,8 @@ public class MangaStatisticScraper extends AnimeAndMangaStatisticScraper {
         Document doc = parseHtml(path);
         MangaStatisticPage page = new MangaStatisticPage(doc);
 
+        System.out.println("Converting stat " + path);
+
         if (page.isEmptyPage()) {
             return null;
         }

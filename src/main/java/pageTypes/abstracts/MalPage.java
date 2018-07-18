@@ -1,5 +1,6 @@
 package pageTypes.abstracts;
 
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -15,17 +16,13 @@ abstract public class MalPage{
 
     private static String producerIdRegex = "/anime/producer/(\\d+)";
     private static String magazineIdRegex = "/manga/magazine/(\\d+)";
-    private static String animeIdRegex = "/anime/(\\d+)";
-    private static String mangaIdRegex = "/manga/(\\d+)";
     private static String personIdRegex = "/people/(\\d+)";
-    private static String genreIdRegex = "/genre/(\\d+)";
 
     protected static Pattern producerIdPattern = Pattern.compile(producerIdRegex);
     protected static Pattern magazineIdPattern = Pattern.compile(magazineIdRegex);
-    protected static Pattern animeIdPattern = Pattern.compile(animeIdRegex);
-    protected static Pattern mangaIdPattern = Pattern.compile(mangaIdRegex);
     protected static Pattern personIdPattern = Pattern.compile(personIdRegex);
-    protected static Pattern genreIdPattern = Pattern.compile(genreIdRegex);
+
+    private static String pathSelector = "meta[property='og:url']";
 
     protected String invalidIdSelector = "div[class='badresult']:contains(Invalid ID provided.)";
 
@@ -82,5 +79,15 @@ abstract public class MalPage{
      */
     public boolean isEmptyPage() {
         return !doc.hasText() || doc.selectFirst(invalidIdSelector) != null;
+    }
+
+    public String getPath() {
+        if (isEmptyPage()) {
+            return null;
+        }
+
+        Element path = doc.selectFirst(pathSelector);
+        String content = path.attr("content");
+        return StringUtils.removeStart(content, "https://myanimelist.net/");
     }
 }

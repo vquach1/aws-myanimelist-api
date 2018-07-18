@@ -276,8 +276,15 @@ public class AnimeAndMangaDetailsPage extends MalPage {
             return new ArrayList<>();
         }
 
-        return related.children().stream()
-                .map(elem -> elem.attr("href").substring(1)) // Trim the beginning slash
-                .collect(Collectors.toList());
+        List<String> paths = new ArrayList<>();
+        for (Element elem : related.children()) {
+            if (!elem.ownText().isEmpty()) {
+                paths.add(elem.attr("href").substring(1)); // Trim beginning slash
+            } else {
+                System.out.println("    Empty for " + parseMainTitle());
+            }
+        }
+
+        return paths;
     }
 }

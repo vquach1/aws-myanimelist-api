@@ -7,6 +7,7 @@ import hibernateUtils.daos.PersonDao;
 import hibernateUtils.mappings.animes.Anime;
 import hibernateUtils.mappings.animes.AnimeSynonymTitle;
 import hibernateUtils.mappings.joinTables.MangaAuthor;
+import hibernateUtils.mappings.joinTables.MangaRelated;
 import hibernateUtils.mappings.lookupTables.*;
 import hibernateUtils.mappings.mangas.MangaSynonymTitle;
 import hibernateUtils.mappings.persons.Person;
@@ -141,8 +142,9 @@ public class MangaScraper extends Scraper {
         return titles;
     }
 
-    private void addRelatedMangas(Manga manga, List<String> relatedMangas, RelatedType relatedType) {
-        for (String relatedPath : relatedMangas) {
+    private void addRelatedMangas(List<MangaRelated> allMangaRelated, Manga manga,
+                                  List<String> relatedMangaPaths, RelatedType relatedType) {
+        for (String relatedPath : relatedMangaPaths) {
             int relatedId = Integer.valueOf(relatedPath.split("/")[1]);
 
             // We must insert the id, path pair int the map because
@@ -155,7 +157,7 @@ public class MangaScraper extends Scraper {
                 relatedManga = convert(relatedId);
             }
 
-            manga.getRelatedMangas().put(relatedManga, relatedType);
+            allMangaRelated.add(new MangaRelated(manga, relatedManga, relatedType));
         }
     }
 
@@ -166,12 +168,12 @@ public class MangaScraper extends Scraper {
             animeIdToPathMap.put(relatedId, relatedPath);
 
             Anime relatedAnime = animeDao.getAnime(relatedId);
-            if (relatedPath == null) {
+            if (relatedAnime == null) {
                 relatedAnime = animeScraper.convert(relatedId);
             }
 
-            //manga.getAnimeAdaptations().add(relatedAnime);
-            //animeDao.addMangaAdaptation(relatedAnime, manga);
+            manga.getAnimeAdaptations().add(relatedAnime);
+            animeDao.addMangaAdaptation(relatedAnime, manga);
         }
     }
 
@@ -219,15 +221,28 @@ public class MangaScraper extends Scraper {
         mangaDao.addMangaAuthors(mangaAuthors);
 
         addAnimeAdaptations(manga, page.parseAdaptations());
-        addRelatedMangas(manga, page.parsePrequels(), relatedTypeMap.get("Prequel"));
-        addRelatedMangas(manga, page.parseSequels(), relatedTypeMap.get("Sequel"));
-        addRelatedMangas(manga, page.parseSideStories(), relatedTypeMap.get("Side story"));
-        addRelatedMangas(manga, page.parseParentStories(), relatedTypeMap.get("Parent story"));
-        addRelatedMangas(manga, page.parseSpinoffs(), relatedTypeMap.get("Spin-off"));
-        addRelatedMangas(manga, page.parseSummaries(), relatedTypeMap.get("Summary"));
-        addRelatedMangas(manga, page.parseAlternativeSettings(), relatedTypeMap.get("Alternative setting"));
-        addRelatedMangas(manga, page.parseAlternativeVersions(), relatedTypeMap.get("Alternative version"));
-        addRelatedMangas(manga, page.parseOthers(), relatedTypeMap.get("Other"));
+
+        List<MangaRelated> allMangaRelated = new ArrayList<>();
+        addRelatedMangas(allMangaRelated, manga,
+                page.parsePrequels(), relatedTypeMap.get("Prequel"));
+        addRelatedMangas(allMangaRelated, manga,
+                page.parseSequels(), relatedTypeMap.get("Sequel"));
+        addRelatedMangas(allMangaRelated, manga,
+                page.parseSideStories(), relatedTypeMap.get("Side story"));
+        addRelatedMangas(allMangaRelated, manga,
+                page.parseParentStories(), relatedTypeMap.get("Parent story"));
+        addRelatedMangas(allMangaRelated, manga,
+                page.parseSpinoffs(), relatedTypeMap.get("Spin-off"));
+        addRelatedMangas(allMangaRelated, manga,
+                page.parseSummaries(), relatedTypeMap.get("Summary"));
+        addRelatedMangas(allMangaRelated, manga,
+                page.parseAlternativeSettings(), relatedTypeMap.get("Alternative setting"));
+        addRelatedMangas(allMangaRelated, manga,
+                page.parseAlternativeVersions(), relatedTypeMap.get("Alternative version"));
+        addRelatedMangas(allMangaRelated, manga,
+                page.parseOthers(), relatedTypeMap.get("Other"));
+
+        mangaDao.addMangaRelated(allMangaRelated);
 
         genericDao.saveOrUpdateMalMapping(manga);
         return manga;
