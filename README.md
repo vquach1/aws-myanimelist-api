@@ -20,7 +20,7 @@ Most of the data from the main anime, manga, character, and person pages from My
 | Path | Usage | Example |
 | ---- | ----- | ------- |
 | anime/{id} | Displays general info from the anime with the MyAnimeList ID | anime/20 refers to https://myanimelist.net/anime/20 |
-| anime/{id}/charStaff | Displays the characters and staff information for the anime | anime/527/charStaff refers to https://myanimelist.net/anime/527/Pokemon/characters | 
+| anime/{id}/charstaff | Displays the characters and staff information for the anime | anime/527/charstaff refers to https://myanimelist.net/anime/527/Pokemon/characters | 
 
 # Architecture
 
