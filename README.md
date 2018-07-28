@@ -12,6 +12,11 @@ This repository only stores the contents of the backend scraper (see Architectur
 
 https://edru1ll5kg.execute-api.us-east-1.amazonaws.com/v1/
 
+For example, you would pull the information for My Hero Academy through
+
+https://edru1ll5kg.execute-api.us-east-1.amazonaws.com/v1/anime/31964, which uses the anime ID from the link
+https://myanimelist.net/anime/31964/Boku_no_Hero_Academia
+
 # Resources
 
 Most of the data from the main anime, manga, character, and person pages from MyAnimeList have already been bulk processed into the database. The API currently exposes only a resource for anime. Howver, manga, character, and person pages will be exposed in August 2018. For the paths listed below, append them onto the end of the URL to test out some queries.
