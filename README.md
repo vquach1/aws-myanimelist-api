@@ -14,7 +14,13 @@ https://edru1ll5kg.execute-api.us-east-1.amazonaws.com/v1/
 
 # Resources
 
-Most of the data from the main anime, manga, character, and person pages from MyAnimeList have already been bulk processed into the database. The API currently exposes only a resource for anime. Howver, manga, character, and person pages will be exposed in August 2018. For the paths listed below, append them onto the end of the URL to test out some queries. 
+Most of the data from the main anime, manga, character, and person pages from MyAnimeList have already been bulk processed into the database. The API currently exposes only a resource for anime. Howver, manga, character, and person pages will be exposed in August 2018. For the paths listed below, append them onto the end of the URL to test out some queries.
+
+As this API is a work-in-progress, you may occasionally run into empty responses or errors. In such cases...
+- Make sure that the ID of your request refers to an actual ID from MyAnimeList
+- Retry the request. There could be a timeout issue involved with API Gateway or Lambda
+- If still not working, then the page may not have been scraped into the database yet. However, sending the request will notify the backend scraper to download the page
+- If none of the above, then it may just be a bug!
 
 ## Anime
 | Path | Usage | Example |
