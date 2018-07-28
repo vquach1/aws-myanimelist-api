@@ -1,5 +1,5 @@
 # Welcome
-This web API scrapes information from MyAnimeList. Though MyAnimeList has its own API, its range of capabilities is limited and requires authentication through injection of usernames and passwords, presenting security vulnerabilities. Though there are other APIs that scrape MyAnimeList, they have traditionally been limited by a number of factors:
+This web API scrapes information from MyAnimeList (https://myanimelist.net/). Though MyAnimeList has its own API, its range of capabilities is limited and requires authentication through injection of usernames and passwords, presenting security vulnerabilities. Though there are other APIs that scrape MyAnimeList, they have traditionally been limited by a number of factors:
 
 - Entirely reliant on a cache. The data is not stored in a database, so if the cache goes down, it will have to be rebuilt
 - Restricted by MyAnimeList's rate limiting. The API cannot handle requests at any arbitrary speed, as it always has to perform HTTP requests to MyAnimeList if the info is not present in its cache
