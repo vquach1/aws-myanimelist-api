@@ -7,6 +7,21 @@ This web API scrapes information from MyAnimeList. Though MyAnimeList has its ow
 
 This API was created to address each one of those issues. It employs a scraper that incrementally downloads pages from MyAnimeList and pulls the information into a database. Because the data is permanently stored, this gives the API a lot more flexibility. Though it can only update its information as fast as MyAnimeList rate limiting allows, it can handle requests at an arbitrary rate. In the future, it will also have custom searches such as the example listed above.
 
+# Using the API
+This repository only stores the contents of the backend scraper (see Architecture section). Due to the scraper's reliance on AWS components, at this time it is not currently possible to run the scraper yourself. However, you can test out the API commands through the URL provided below:
+
+https://edru1ll5kg.execute-api.us-east-1.amazonaws.com/v1/
+
+# Resources
+
+Most of the data from the main anime, manga, character, and person pages from MyAnimeList have already been bulk processed into the database. The API currently exposes only a resource for anime. Howver, manga, character, and person pages will be exposed in August 2018. For the paths listed below, append them onto the end of the URL to test out some queries. 
+
+## Anime
+| Path | Usage | Example |
+| ---- | ----- | ------- |
+| anime/{id} | Displays general info from the anime with the MyAnimeList ID | anime/20 refers to https://myanimelist.net/anime/20 |
+| anime/{id}/charStaff | Displays the characters and staff information for the anime | anime/527/charStaff refers to https://myanimelist.net/anime/527/Pokemon/characters | 
+
 # Architecture
 
 ## Amazon Web Services
